@@ -1,8 +1,5 @@
 const User = require('../../app/models/user')
 
-const REDIR_URL = 'http://localhost:8080'
-const PROD_API_URL = true ? 'http://localhost:4000' : 'https://api.connectedacademy.io'
-
 module.exports = function (app, passport, io) {
 
   // Return the current user
@@ -28,15 +25,15 @@ module.exports = function (app, passport, io) {
 
   // Twitter login
   app.get('/v1/auth/twitter/login', function (req, res, next) {
-    passport.authenticate('twitter', { callbackURL: `${PROD_API_URL}/auth/twitter/callback` })(req, res, next)
+    passport.authenticate('twitter', { callbackURL: `${process.env.API_URL}/auth/twitter/callback` })(req, res, next)
   })
 
   // Twitter callback
   app.get('/auth/twitter/callback', function (req, res, next) {
     passport.authenticate('twitter', {
-      callbackURL: `${PROD_API_URL}/auth/twitter/callback`,
-      successRedirect: `${REDIR_URL}/profile`,
-      failureRedirect: `${REDIR_URL}/auth`
+      callbackURL: `${process.env.API_URL}/auth/twitter/callback`,
+      successRedirect: `${process.env.REDIR_URL}/profile`,
+      failureRedirect: `${process.env.REDIR_URL}/auth`
     })(req, res, next)
   })
 
