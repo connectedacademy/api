@@ -2,21 +2,6 @@ version: "2"
 
 services:
 
-  app:
-    image: zzrot/alpine-caddy
-    ports:
-      - 80:80
-      - 443:443
-    environment:
-      - API_ADDRESS
-    volumes:
-      - ./Caddyfile:/etc/Caddyfile
-      - ./app:/srv/app
-      - ./app/serve:/var/www/html
-      - ./.caddy:/root/.caddy
-    links:
-      - api
-
   api:
     build: ./api
     # ports:
