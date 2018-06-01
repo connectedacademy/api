@@ -11,16 +11,13 @@ services:
       - API_ADDRESS
     volumes:
       - ./Caddyfile:/etc/Caddyfile
-      - ./app:/srv/app
-      - ./app/serve:/var/www/html
+      - ./app/dist:/var/www/html
       - ./.caddy:/root/.caddy
     links:
       - api
 
   api:
     build: ./api
-    # ports:
-    #   - 4000:3000
     restart: always
     volumes:
       - ./api:/app
