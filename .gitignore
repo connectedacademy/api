@@ -1,0 +1,4 @@
+.vscode
+.env
+.caddy
+api/examples/*

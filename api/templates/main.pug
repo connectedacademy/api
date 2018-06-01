@@ -1,0 +1,20 @@
+html(lang='en')
+  
+  body
+
+    #email--wrapper(style="background-color: white; max-width: 640px")
+
+      #email--header(style="background-color: #0B9BD0; padding: 30px 40px")
+        h1(style="color: white; font-weight: normal; margin: 0; padding: 0")
+          a(href="#{ url }/" style="color: white; text-decoration: none") Connected Academy
+
+      #email--body(style="background-color: #F8F8F8; padding: 30px 40px")
+
+        block content
+
+        br
+
+        p Have a lovely day!
+
+      #email--footer(style="background-color: white; padding: 20px 40px")
+        p(style="color: #666") If you would like to <a href="#{ url }/unsubscribe" style="color: #666">unsubscribe</a> from emails like this please <a href="#{ url }/unsubscribe" style="color: #666">visit the site</a>.
