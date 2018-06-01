@@ -90,9 +90,14 @@ module.exports = function (app, passport, io) {
   // Get class audio
   app.get('/v1/audio/:class/:filename',
     async (req, res) => {
-      // Check for local file
+
+      // let url = 'https://github.com/connectedacademy/rocket/raw/master/course/content/audio/self-portraits-32.mp3'
+      // request(url).pipe(res)
+
       try {
         let file = await fs.readFile(resolve(req.instance, `audio/${req.params.filename}`))
+        res.setHeader('Accept-Ranges', 'bytes');
+        res.setHeader('Content-Type', 'application/octet-stream');
         res.send(file)
       } catch (error) {
         res.send('Failed to load audio')
@@ -116,7 +121,14 @@ module.exports = function (app, passport, io) {
   // Get class image
   app.get('/v1/images/:size/:filename',
     async (req, res) => {
-      res.setHeader("content-disposition", `attachment; filename=${req.params.filename}`);
-      request(`${coursePath(req.instance)}/course/content/media/${req.params.filename}`).pipe(res)
+      try {
+        let file = await fs.readFile(resolve(req.instance, `images/${req.params.filename}`))
+        res.setHeader('Content-Type', 'image/jpeg');
+        res.send(file)
+      } catch (error) {
+        res.send('Failed to load image')
+      }
+      // res.setHeader("content-disposition", `attachment; filename=${req.params.filename}`);
+      // request(`${coursePath(req.instance)}/course/content/media/${req.params.filename}`).pipe(res)
     })
 }
