@@ -33,6 +33,7 @@
     "morgan": "~1.0.0",
     "nodemailer": "^4.0.1",
     "nodemon": "^1.11.0",
+    "parse-srt": "^1.0.0-alpha",
     "passport": "~0.1.17",
     "passport-local": "~0.1.6",
     "passport-twitter": "^1.0.4",

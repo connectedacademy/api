@@ -55,7 +55,7 @@ app.use(function (req, res, next) {
     const matches = url.match(/^https?:\/\/([^/?#]+)(?:[/?#]|$)/i)
     const domain = matches[1]
     const subdomain = domain.split('.')[0]
-    instance = (!subdomain) ? 'localhost' : subdomain
+    instance = (subdomain.indexOf('localhost') !== -1) ? 'rocket' : subdomain
   }
   req.instance = instance
 

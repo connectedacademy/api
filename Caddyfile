@@ -19,6 +19,7 @@ rocket.connectedacademy.io {
 api.connectedacademy.io {
   timeouts 10m
   proxy / api:3000 {
+    websocket
     health_check /health
     health_check_interval 10s
   }
