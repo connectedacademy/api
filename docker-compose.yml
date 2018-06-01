@@ -11,6 +11,7 @@ services:
       - API_ADDRESS
     volumes:
       - ./Caddyfile:/etc/Caddyfile
+      - ./app:/srv/app
       - ./app/serve:/var/www/html
       - ./.caddy:/root/.caddy
     links:
