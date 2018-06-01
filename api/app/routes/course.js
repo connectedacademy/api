@@ -88,11 +88,11 @@ module.exports = function (app, passport, io) {
     })
 
   // Get class audio
-  app.get('/v1/audio/:filename',
+  app.get('/v1/audio/:class/:filename',
     async (req, res) => {
       // Check for local file
       try {
-        let file = await fs.readFile(resolve(req.instance, `${req.params.filename}`))
+        let file = await fs.readFile(resolve(req.instance, `audio/${req.params.filename}`))
         res.send(file)
       } catch (error) {
         res.send('Failed to load audio')
