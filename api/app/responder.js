@@ -26,7 +26,8 @@ const loopMessages = async function (io) {
   let messages = await Message.find({ _parent: { $exists: false } })
 
   for (let message of messages) {
-    if (message._replies.length === 0) {
+    const luck = (_random(0, 10) === 5)
+    if (luck && message._replies.length === 0) {
 
       const messageUser = await User.findOne({ _id: message._user })
       let userCount = await User.count({ _id: { $ne: messageUser._id }})
