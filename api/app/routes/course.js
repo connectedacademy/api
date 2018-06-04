@@ -6,6 +6,8 @@ let request = require('request')
 let parseSRT = require('parse-srt')
 
 function resolve(instance, dir) {
+  console.log('__dirname', __dirname)
+  
   return path.join(__dirname, `../../examples/${instance}`, dir)
 }
 
@@ -26,14 +28,19 @@ async function loadLocalFile(instance, filename) {
   let srtPath = resolve(instance, `${filename}.srt`)
   let jsonPath = resolve(instance, `${filename}.json`)
 
-  let err = await fs.access(jsonPath)
+  console.log('srtPath', srtPath)
+  console.log('jsonPath', jsonPath)
+
   let jsonFile
-  if (err) {
+  
+  try {
+    let err = await fs.access(jsonPath)
+  } catch (error) {
     console.log('JSON file not found - writing file...');
     let file = await fs.readFile(srtPath, 'utf8')
     jsonFile = await fs.writeFile(jsonPath, JSON.stringify(parseSRT(file)))
     return jsonFile
-  } else {
+  } finally {
     console.log('JSON file found!');
     jsonFile = await fs.readFile(jsonPath, 'utf8')
     return jsonFile
@@ -101,6 +108,7 @@ module.exports = function (app, passport, io) {
         res.setHeader('Content-Type', 'application/octet-stream');
         res.send(file)
       } catch (error) {
+        console.log('error', error)
         res.send('Failed to load audio')
       }
     })
@@ -113,6 +121,7 @@ module.exports = function (app, passport, io) {
         const file = await loadLocalFile(req.instance, `classes/${req.params.class}/${req.params.filename}`)
         res.send(file)
       } catch (error) {
+        console.log('error', error)
         res.send('Failed to load media')
       }
     })
@@ -121,10 +130,14 @@ module.exports = function (app, passport, io) {
   app.get('/v1/transcript/:class/:filename',
     async (req, res) => {
       try {
+        console.log(req.params.class)
+        console.log(req.params.filename)
+        
         console.log(`Attempting to load a file - ${`classes/${req.params.class}/${req.params.filename}`}`);
         const file = await loadLocalFile(req.instance, `classes/${req.params.class}/${req.params.filename}`)
         res.send(file)
       } catch (error) {
+        console.log('error', error)
         res.send('Failed to load transcript')
       }
     })
@@ -137,6 +150,7 @@ module.exports = function (app, passport, io) {
         res.setHeader('Content-Type', 'image/jpeg');
         res.send(file)
       } catch (error) {
+        console.log('error', error)
         res.send('Failed to load image')
       }
       // res.setHeader("content-disposition", `attachment; filename=${req.params.filename}`);

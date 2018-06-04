@@ -50,6 +50,8 @@ module.exports = function (app, passport, io) {
     async (req, res) => {
       // Get students
       const classroom = await Classroom.findOne({ _user: req.user, class: req.params.class })
+      // No classroom?
+      if (!classroom) { res.json([]) }
       // Return students
       res.json(classroom._students)
     })
