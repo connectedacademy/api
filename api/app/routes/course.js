@@ -26,20 +26,17 @@ async function loadLocalFile(instance, filename) {
   let srtPath = resolve(instance, `${filename}.srt`)
   let jsonPath = resolve(instance, `${filename}.json`)
 
-  console.log('srtPath', srtPath)
-  console.log('jsonPath', jsonPath)
-
   let jsonFile
   
   try {
     let err = await fs.access(jsonPath)
   } catch (error) {
-    console.log('JSON file not found - writing file...');
+    console.log('JSON not found - writing..');
     let file = await fs.readFile(srtPath, 'utf8')
     jsonFile = await fs.writeFile(jsonPath, JSON.stringify(parseSRT(file)))
     return jsonFile
   } finally {
-    console.log('JSON file found!');
+    console.log('JSON found');
     jsonFile = await fs.readFile(jsonPath, 'utf8')
     return jsonFile
   }
@@ -54,10 +51,10 @@ module.exports = function (app, passport, io) {
       let raw = await fs.readFile(resolve(req.instance, '/course.yaml'), 'utf8')
       let course = yaml.safeLoad(raw)
       course.classes.forEach(o => {
-        if (moment().startOf('day').isSameOrAfter(moment(o.date).startOf('day'))) {
+        if (moment().startOf('day').isSameOrAfter(moment(o.date, "MM-DD-YYYY").startOf('day'))) {
           o.released = true // Class is released
         }
-        if (moment().startOf('day').isSame(moment(o.date).startOf('day'))) {
+        if (moment().startOf('day').isSame(moment(o.date, "MM-DD-YYYY").startOf('day'))) {
           o.active = true // Class is active
         }
       })

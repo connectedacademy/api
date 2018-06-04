@@ -102,7 +102,14 @@ fakeActivity = () => {
   activity.homeworkSubmissions()
   setTimeout(() => { activity.homeworkMessages() }, 5000)
 }
+
+fakeResponder = () => {
+  const responder = require('./app/responder.js')(io)
+  responder.begin()
+}
+
 http.listen(port, () => {
   console.log(`Listening on port ${port}!`)
   // fakeActivity()
+  fakeResponder()
 })

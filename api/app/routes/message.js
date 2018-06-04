@@ -52,6 +52,7 @@ module.exports = function (app, passport, io) {
       }
       let message = new Message(data)
       message = await message.save()
+      message = await Message.findOne({ _id: message._id })
       
       const messageCount = await Message.count({ class: message.class, segment: message.segment })
       message = message.toObject()
@@ -63,7 +64,7 @@ module.exports = function (app, passport, io) {
 
       // Reply
       if (req.body.replyTo) {
-        let originalMessage = await Message.findOneAndUpdate({ _id: req.body.replyTo }, { $push: { _replies: message.id } })
+        let originalMessage = await Message.findOneAndUpdate({ _id: req.body.replyTo }, { $push: { _replies: message._id } })
         return res.json({ message: message, originalMessage: originalMessage })
       }
       return res.json({ message: message })
