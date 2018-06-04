@@ -64,7 +64,7 @@ module.exports = function (app, passport, io) {
   app.get('/v1/class/:id',
     async (req, res) => {
       // Load example class
-      let raw = await fs.readFile(resolve(req.instance, `/classes/${req.params.id}.yaml`), 'utf8')
+      let raw = await fs.readFile(resolve(req.instance, `/classes/${req.params.id}/config.yaml`), 'utf8')
       // Return class as json
       res.json(yaml.safeLoad(raw))
     })
@@ -73,7 +73,7 @@ module.exports = function (app, passport, io) {
   app.get('/v1/content/:content',
     async (req, res) => {
 
-      let path = `/content/${decodeURIComponent(req.params.content)}.md`
+      let path = `/classes/${decodeURIComponent(req.params.content)}.md`
 
       // Check for local file
       try {
@@ -95,7 +95,8 @@ module.exports = function (app, passport, io) {
       // request(url).pipe(res)
 
       try {
-        let file = await fs.readFile(resolve(req.instance, `audio/${req.params.filename}`))
+        console.log(`Attempting to load a file - ${resolve(req.instance, `classes/${req.params.class}/${req.params.filename}`)}`);
+        const file = await fs.readFile(resolve(req.instance, `classes/${req.params.class}/${req.params.filename}`))
         res.setHeader('Accept-Ranges', 'bytes');
         res.setHeader('Content-Type', 'application/octet-stream');
         res.send(file)
@@ -107,15 +108,25 @@ module.exports = function (app, passport, io) {
   // Get class media
   app.get('/v1/media/:class/:filename',
     async (req, res) => {
-      const file = await loadLocalFile(req.instance, `content/${req.params.class}/transcripts/${req.params.filename}`)
-      res.send(file)
+      try {
+        console.log(`Attempting to load a file - ${`classes/${req.params.class}/${req.params.filename}`}`);
+        const file = await loadLocalFile(req.instance, `classes/${req.params.class}/${req.params.filename}`)
+        res.send(file)
+      } catch (error) {
+        res.send('Failed to load media')
+      }
     })
 
-  // Get class subtitles
-  app.get('/v1/subtitles/:class/:filename',
+  // Get class transcript
+  app.get('/v1/transcript/:class/:filename',
     async (req, res) => {
-      const file = await loadLocalFile(req.instance, `content/${req.params.class}/transcripts/${req.params.filename}`)
-      res.send(file)
+      try {
+        console.log(`Attempting to load a file - ${`classes/${req.params.class}/${req.params.filename}`}`);
+        const file = await loadLocalFile(req.instance, `classes/${req.params.class}/${req.params.filename}`)
+        res.send(file)
+      } catch (error) {
+        res.send('Failed to load transcript')
+      }
     })
 
   // Get class image
