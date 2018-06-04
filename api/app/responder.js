@@ -58,7 +58,7 @@ const loopMessages = async function (io) {
       io.to('class').emit('visualisation', 'Updated')
     }
   }
-  await sleep(30000)
+  await sleep(20000)
   return 'Responded'
 }
 
