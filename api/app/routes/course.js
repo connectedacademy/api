@@ -6,8 +6,6 @@ let request = require('request')
 let parseSRT = require('parse-srt')
 
 function resolve(instance, dir) {
-  console.log('__dirname', __dirname)
-  
   return path.join(__dirname, `../../examples/${instance}`, dir)
 }
 
@@ -79,8 +77,13 @@ module.exports = function (app, passport, io) {
   // Get course content
   app.get('/v1/content/:content',
     async (req, res) => {
-
-      let path = `/classes/${decodeURIComponent(req.params.content)}.md`
+      const requestedPath = decodeURIComponent(req.params.content)
+      let path
+      if (requestedPath.indexOf('/') === -1) {
+        path = `content/${requestedPath}.md`
+      } else {
+        path = `classes/${requestedPath}.md`
+      }
 
       // Check for local file
       try {
