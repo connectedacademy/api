@@ -30,17 +30,16 @@ module.exports = function (app, passport, io) {
   })
 
   // Twitter login
-  app.get('/v1/auth/twitter/login', function (req, res, next) {
-    passport.authenticate('twitter', { callbackURL: `${process.env.API_URL}/auth/twitter/callback` })(req, res, next)
+  app.get('/v1/auth/twitter/login/:instance', function (req, res, next) {
+    passport.authenticate('twitter', { callbackURL: `${process.env.API_URL}/auth/twitter/callback/${req.params.instance}` })(req, res, next)
   })
 
   // Twitter callback
-  app.get('/v1/auth/twitter/callback', function (req, res, next) {
+  app.get('/v1/auth/twitter/callback/:instance', function (req, res, next) {
     passport.authenticate('twitter', {
       callbackURL: `${process.env.API_URL}/auth/twitter/callback`,
-      successRedirect: `https://${req.instance}.connectedacademy.io/profile`,
-      failureRedirect: `https://${req.instance}.connectedacademy.io/auth`
+      successRedirect: process.env.DEV_MODE ? `http://localhost:8080/profile` : `https://${req.params.instance}.connectedacademy.io/profile`,
+      failureRedirect: process.env.DEV_MODE ? `http://localhost:8080/auth` : `https://${req.params.instance}.connectedacademy.io/auth`
     })(req, res, next)
   })
-
 }
