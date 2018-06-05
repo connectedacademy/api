@@ -1,3 +1,4 @@
+const User = require('../../app/models/user')
 const Message = require('../../app/models/message')
 const Classroom = require('../../app/models/classroom')
 
@@ -8,39 +9,38 @@ module.exports = function (app, passport, io) {
     async (req, res) => {
       let vis = await Message.aggregate([{ $match: { class: req.params.class } }, { $group: { _id: "$segment", count: { $sum: 1 } } }])
       let max = Math.max.apply(Math, vis.map(o => o.count))
-      let result = {}
-      let groups = {}
+      let visualisation = {}, groups = {}
 
       for (let v of vis) {
-        let segment = parseInt(v._id)
+        const segment = parseInt(v._id)
         let percent = Math.floor((segment / (req.params.duration / 5)) * 100)
         let val = parseInt(v.count) / max
         
-        if (result[percent]) {
-          result[percent] = result[percent] + val
+        if (visualisation[percent]) {
+          visualisation[percent] += val
           groups[percent] = groups[percent] ? groups[percent] + 1 : 2
-        } else {
-          result[percent] = val
+          continue
         }
+        visualisation[percent] = val
       }
 
       for (let key in groups) {
-        result[key] = result[key] / groups[key]
+        visualisation[key] = visualisation[key] / groups[key]
       }
+
       let fill = 0
       while (fill <= 100) {
-        result[fill] = result[fill] ? result[fill] : 0
+        visualisation[fill] = visualisation[fill] ? visualisation[fill] : 0
         fill++
       }
 
-      res.json({
-        visualisation: result
-      })
+      res.json({ visualisation })
     })
 
   // Create message
   app.post('/v1/messages/create',
     async (req, res) => {
+
       const data = {
         _user: req.user,
         _parent: req.body.replyTo,
@@ -57,17 +57,32 @@ module.exports = function (app, passport, io) {
       const messageCount = await Message.count({ class: message.class, segment: message.segment })
       message = message.toObject()
       message.total = messageCount
-
-      // Notify users
-      io.to('class').emit('message', message)
-      io.to('class').emit('visualisation', 'Updated')
+      
+      let response = { message: message }
 
       // Reply
       if (req.body.replyTo) {
-        let originalMessage = await Message.findOneAndUpdate({ _id: req.body.replyTo }, { $push: { _replies: message._id } })
-        return res.json({ message: message, originalMessage: originalMessage })
+        
+        let originalMessage = await Message.findOne({ _id: req.body.replyTo })
+        let originalMessageUser = await User.findOne({ _id: originalMessage._user._id })
+        
+        const handle = `@${originalMessageUser.twitter.username}`
+        if (message.text.indexOf(handle) === -1) {
+          message = await Message.findByIdAndUpdate(message._id, { text: `${handle} ${message.text}` }, { upsert: true })
+        }
+        originalMessage = await Message.findOneAndUpdate({ _id: req.body.replyTo }, { $push: { _replies: message._id } })
+
+        message = await Message.findOne({ _id: message._id })
+        originalMessage = await Message.findOne({ _id: req.body.replyTo })
+
+        response.originalMessage = originalMessage
       }
-      return res.json({ message: message })
+      
+      // Notify users
+      io.to('class').emit('message', message)
+      io.to('class').emit('visualisation', 'Updated')
+      
+      res.json(response)
     }
   )
 

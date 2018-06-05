@@ -41,6 +41,7 @@
     "pug": "^2.0.0-rc.3",
     "randomstring": "^1.1.5",
     "sentence-generator": "^1.0.1",
+    "serve-static": "^1.13.2",
     "simple-markov": "^1.0.2",
     "socket.io": "^2.1.0",
     "url": "^0.11.0"

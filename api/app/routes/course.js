@@ -5,19 +5,28 @@ let moment = require('moment')
 let request = require('request')
 let parseSRT = require('parse-srt')
 
+function YamlObj(file, course) {
+  this.file = file
+  this.course = course
+
+  this.format = () => {
+    this.file = formatMarkdown(this.file, this.course)
+  }
+  this.toJson = () => {
+    return yaml.safeLoad(this.file)
+  }
+}
+
 function resolve(instance, dir) {
   return path.join(__dirname, `../../examples/${instance}`, dir)
 }
 
 const coursePath = (course) => {
-  return `https://raw.githubusercontent.com/connectedacademy/${course}/master`
+  return `${process.env.CDN_URL}/${course}`
 }
 
 function formatMarkdown(raw, course) {
-  let markdown = raw
-  markdown = markdown.replace(/{{site.baseurl}}/g, coursePath(course))
-  markdown = markdown.replace(/thumb/g, '')
-  return markdown
+  return raw.replace(/CDN_URL/g, coursePath(course))
 }
 
 async function loadLocalFile(instance, filename) {
@@ -58,6 +67,10 @@ module.exports = function (app, passport, io) {
           o.active = true // Class is active
         }
       })
+
+      // Set API
+      course.cdn = process.env.API_URL
+
       // Return course as json
       res.json(course)
     })
@@ -66,9 +79,14 @@ module.exports = function (app, passport, io) {
   app.get('/v1/class/:id',
     async (req, res) => {
       // Load example class
-      let raw = await fs.readFile(resolve(req.instance, `/classes/${req.params.id}/config.yaml`), 'utf8')
+      let yamlObj = new YamlObj()
+      yamlObj.file = await fs.readFile(resolve(req.instance, `/classes/${req.params.id}/config.yaml`), 'utf8')
+      yamlObj.course = req.instance
+      yamlObj.format()
+      console.log('yamlObj', yamlObj)
+      
       // Return class as json
-      res.json(yaml.safeLoad(raw))
+      res.json(yamlObj.toJson())
     })
 
   // Get course content
@@ -88,28 +106,9 @@ module.exports = function (app, passport, io) {
         console.log('Found local file')
         res.send(formatMarkdown(raw.toString(), req.instance))
       } catch (error) {
-        console.log('No local file - loading remote file')
-        // No local file, try load remote file
-        res.send('Content could not be loaded')
-      }
-    })
-
-  // Get class audio
-  app.get('/v1/audio/:class/:filename',
-    async (req, res) => {
-
-      // let url = 'https://github.com/connectedacademy/rocket/raw/master/course/content/audio/self-portraits-32.mp3'
-      // request(url).pipe(res)
-
-      try {
-        console.log(`Attempting to load a file - ${resolve(req.instance, `classes/${req.params.class}/${req.params.filename}`)}`);
-        const file = await fs.readFile(resolve(req.instance, `classes/${req.params.class}/${req.params.filename}`))
-        res.setHeader('Accept-Ranges', 'bytes');
-        res.setHeader('Content-Type', 'application/octet-stream');
-        res.send(file)
-      } catch (error) {
+        // No local file
         console.log('error', error)
-        res.send('Failed to load audio')
+        res.send('Content could not be loaded')
       }
     })
 
@@ -130,9 +129,6 @@ module.exports = function (app, passport, io) {
   app.get('/v1/transcript/:class/:filename',
     async (req, res) => {
       try {
-        console.log(req.params.class)
-        console.log(req.params.filename)
-        
         console.log(`Attempting to load a file - ${`classes/${req.params.class}/${req.params.filename}`}`);
         const file = await loadLocalFile(req.instance, `classes/${req.params.class}/${req.params.filename}`)
         res.send(file)
@@ -140,20 +136,5 @@ module.exports = function (app, passport, io) {
         console.log('error', error)
         res.send('Failed to load transcript')
       }
-    })
-
-  // Get class image
-  app.get('/v1/images/:size/:filename',
-    async (req, res) => {
-      try {
-        let file = await fs.readFile(resolve(req.instance, `images/${req.params.filename}`))
-        res.setHeader('Content-Type', 'image/jpeg');
-        res.send(file)
-      } catch (error) {
-        console.log('error', error)
-        res.send('Failed to load image')
-      }
-      // res.setHeader("content-disposition", `attachment; filename=${req.params.filename}`);
-      // request(`${coursePath(req.instance)}/course/content/media/${req.params.filename}`).pipe(res)
     })
 }

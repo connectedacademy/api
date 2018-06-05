@@ -5,6 +5,12 @@ module.exports = function (app, passport, io) {
   // Return the current user
   app.get('/v1/auth/me',
     async (req, res) => {
+      if (!req.user) {
+        return res.json({
+          status: 'Not authenticated',
+          user: undefined
+        })
+      }
       // Find user
       let user = await User.findOne({ _id: req.user._id })
       // Convert to standard object so roles can be set
@@ -29,7 +35,7 @@ module.exports = function (app, passport, io) {
   })
 
   // Twitter callback
-  app.get('/auth/twitter/callback', function (req, res, next) {
+  app.get('/v1/auth/twitter/callback', function (req, res, next) {
     passport.authenticate('twitter', {
       callbackURL: `${process.env.API_URL}/auth/twitter/callback`,
       successRedirect: `${process.env.REDIR_URL}/profile`,

@@ -26,8 +26,7 @@ const loopMessages = async function (io) {
   let messages = await Message.find({ _parent: { $exists: false } })
 
   for (let message of messages) {
-    const luck = true || (_random(0, 10) === 5)
-    if (luck && message._replies.length === 0) {
+    if (message._replies.length === 0) {
 
       const messageUser = await User.findOne({ _id: message._user })
       let userCount = await User.count({ 'twitter.username': { "$in": ["edjenkins91", "jessjones_ca", "peterwick_ca", "henry_jack_son"] } })
@@ -58,7 +57,7 @@ const loopMessages = async function (io) {
       io.to('class').emit('visualisation', 'Updated')
     }
   }
-  await sleep(20000)
+  await sleep(_random(10000, 20000))
   return 'Responded'
 }
 

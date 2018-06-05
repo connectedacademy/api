@@ -2,11 +2,13 @@ require('dotenv').config()
 
 const express = require('express')
 const cors = require('cors')
+const path = require('path')
 const mongoose = require('mongoose')
 
 const port = process.env.PORT || 3000
 const passport = require('passport')
 const flash = require('connect-flash')
+const serveStatic = require('serve-static')
 
 const morgan = require('morgan')
 const cookieParser = require('cookie-parser')
@@ -46,6 +48,7 @@ mongoose.connect(configDB.url) // connect to our database
 app.use(morgan('dev')) // log every request to the console
 app.use(cookieParser()) // read cookies (needed for auth)
 app.use(bodyParser.json())
+app.use(serveStatic(path.join(__dirname, 'examples')))
 
 // Instance middleware
 app.use(function (req, res, next) {
@@ -68,7 +71,8 @@ app.use(session({
     // socket: ,
     // url: ,
     host: 'redis',
-    port: 6379
+    port: 6379,
+    saveUninitialized: false
   }),
   secret: process.env.PASSPORT_SESSION_SECRET || 'not_very_secret',
   resave: false
@@ -111,5 +115,5 @@ fakeResponder = () => {
 http.listen(port, () => {
   console.log(`Listening on port ${port}!`)
   // fakeActivity()
-  fakeResponder()
+  // fakeResponder()
 })
