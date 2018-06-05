@@ -69,7 +69,7 @@ module.exports = function (app, passport, io) {
       })
 
       // Set API
-      course.cdn = process.env.API_URL
+      course.cdn = process.env.CDN_URL
 
       // Return course as json
       res.json(course)
