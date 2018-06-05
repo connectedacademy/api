@@ -68,8 +68,8 @@ module.exports = function (app, passport, io) {
         }
       })
 
-      // Set API
-      course.cdn = process.env.CDN_URL
+      // Set CDN
+      course.cdn = `${process.env.CDN_URL}/${course.slug}`
 
       // Return course as json
       res.json(course)
