@@ -38,8 +38,8 @@ module.exports = function (app, passport, io) {
   app.get('/v1/auth/twitter/callback', function (req, res, next) {
     passport.authenticate('twitter', {
       callbackURL: `${process.env.API_URL}/auth/twitter/callback`,
-      successRedirect: `${process.env.REDIR_URL}/profile`,
-      failureRedirect: `${process.env.REDIR_URL}/auth`
+      successRedirect: `${req.instance}.${process.env.REDIR_URL}/profile`,
+      failureRedirect: `${req.instance}.${process.env.REDIR_URL}/auth`
     })(req, res, next)
   })
 
