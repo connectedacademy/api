@@ -57,8 +57,15 @@ module.exports = function (app, passport, io) {
   app.get('/v1/course',
     async (req, res) => {
       // Load example course
-      let raw = await fs.readFile(resolve(req.instance, '/course.yaml'), 'utf8')
-      let course = yaml.safeLoad(raw)
+      let yamlObj = new YamlObj()
+      yamlObj.file = await fs.readFile(resolve(req.instance, '/course.yaml'), 'utf8')
+      yamlObj.course = req.instance
+      yamlObj.format()
+
+      // Return class as json
+      let course = yamlObj.toJson()
+
+      // Check releases
       course.classes.forEach(o => {
         if (moment().startOf('day').isSameOrAfter(moment(o.date, "MM-DD-YYYY").startOf('day'))) {
           o.released = true // Class is released
@@ -83,7 +90,6 @@ module.exports = function (app, passport, io) {
       yamlObj.file = await fs.readFile(resolve(req.instance, `/classes/${req.params.id}/config.yaml`), 'utf8')
       yamlObj.course = req.instance
       yamlObj.format()
-      console.log('yamlObj', yamlObj)
       
       // Return class as json
       res.json(yamlObj.toJson())
