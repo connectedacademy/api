@@ -1,4 +1,24 @@
+var path = require('path')
+let yaml = require('js-yaml')
+let fs = require('fs-promise')
+
 const User = require('../../app/models/user')
+
+function YamlObj(file, course) {
+  this.file = file
+  this.course = course
+
+  this.format = () => {
+    // this.file = formatMarkdown(this.file, this.course)
+  }
+  this.toJson = () => {
+    return yaml.safeLoad(this.file)
+  }
+}
+
+function resolve(instance, dir) {
+  return path.join(__dirname, `../../examples/${instance}`, dir)
+}
 
 module.exports = function (app, passport, io) {
 
@@ -11,12 +31,24 @@ module.exports = function (app, passport, io) {
           user: undefined
         })
       }
+
       // Find user
       let user = await User.findOne({ _id: req.user._id })
-      // Convert to standard object so roles can be set
       user = user.toObject()
+
+      // Load course
+      let yamlObj = new YamlObj()
+      yamlObj.file = await fs.readFile(resolve(req.instance, '/course.yaml'), 'utf8')
+      yamlObj.course = req.instance
+      let course = yamlObj.toJson()
+
+      // Check if user is admin
+      user.isAdmin = course.admins.indexOf(user.twitter.username.toLowerCase()) !== -1
+      user.isTeacher = course.teachers.indexOf(user.twitter.username.toLowerCase()) !== -1
+
       // TODO: Set user roles
       user.roles = ['admin', 'teacher', 'user']
+
       res.json({ user: user })
     })
 
