@@ -1,55 +1,6 @@
-var path = require('path')
-let yaml = require('js-yaml')
-let fs = require('fs-promise')
-let moment = require('moment')
-let request = require('request')
-let parseSRT = require('parse-srt')
-
-function YamlObj(file, course) {
-  this.file = file
-  this.course = course
-
-  this.format = () => {
-    this.file = formatMarkdown(this.file, this.course)
-  }
-  this.toJson = () => {
-    return yaml.safeLoad(this.file)
-  }
-}
-
-function resolve(instance, dir) {
-  return path.join(__dirname, `../../examples/${instance}`, dir)
-}
-
-const coursePath = (course) => {
-  return `${process.env.CDN_URL}/${course}`
-}
-
-function formatMarkdown(raw, course) {
-  return raw.replace(/CDN_URL/g, coursePath(course))
-}
-
-async function loadLocalFile(instance, filename) {
-
-  // Check for local file
-  let srtPath = resolve(instance, `${filename}.srt`)
-  let jsonPath = resolve(instance, `${filename}.json`)
-
-  let jsonFile
-  
-  try {
-    let err = await fs.access(jsonPath)
-  } catch (error) {
-    console.log('JSON not found - writing..');
-    let file = await fs.readFile(srtPath, 'utf8')
-    jsonFile = await fs.writeFile(jsonPath, JSON.stringify(parseSRT(file)))
-    return jsonFile
-  } finally {
-    console.log('JSON found');
-    jsonFile = await fs.readFile(jsonPath, 'utf8')
-    return jsonFile
-  }
-}
+const moment = require('moment')
+const utils = require('../utilities/utils.js')()
+const YamlObj = require('../utilities/yamlObj')
 
 module.exports = function (app, passport, io) {
 
@@ -57,13 +8,8 @@ module.exports = function (app, passport, io) {
   app.get('/v1/course',
     async (req, res) => {
       // Load example course
-      let yamlObj = new YamlObj()
-      yamlObj.file = await fs.readFile(resolve(req.instance, '/course.yaml'), 'utf8')
-      yamlObj.course = req.instance
-      yamlObj.format()
-
-      // Return class as json
-      let course = yamlObj.toJson()
+      let yamlObj = new YamlObj(req.instance)
+      let course = await yamlObj.loadFile('/course.yaml', true)
 
       // Check releases
       course.classes.forEach(o => {
@@ -86,13 +32,11 @@ module.exports = function (app, passport, io) {
   app.get('/v1/class/:id',
     async (req, res) => {
       // Load example class
-      let yamlObj = new YamlObj()
-      yamlObj.file = await fs.readFile(resolve(req.instance, `/classes/${req.params.id}/config.yaml`), 'utf8')
-      yamlObj.course = req.instance
-      yamlObj.format()
-      
+      let yamlObj = new YamlObj(req.instance)
+      let theClass = await yamlObj.loadFile(`/classes/${req.params.id}/config.yaml`, true)
+
       // Return class as json
-      res.json(yamlObj.toJson())
+      res.json(theClass)
     })
 
   // Get course content
@@ -108,9 +52,8 @@ module.exports = function (app, passport, io) {
 
       // Check for local file
       try {
-        let raw = await fs.readFile(resolve(req.instance, path), 'utf8')
-        console.log('Found local file')
-        res.send(formatMarkdown(raw.toString(), req.instance))
+        let raw = await fs.readFile(utils.resolve(req.instance, path), 'utf8')
+        res.send(utils.formatMarkdown(raw.toString(), req.instance))
       } catch (error) {
         // No local file
         console.log('error', error)
@@ -123,7 +66,7 @@ module.exports = function (app, passport, io) {
     async (req, res) => {
       try {
         console.log(`Attempting to load a file - ${`classes/${req.params.class}/${req.params.filename}`}`);
-        const file = await loadLocalFile(req.instance, `classes/${req.params.class}/${req.params.filename}`)
+        const file = await utils.loadLocalFile(req.instance, `classes/${req.params.class}/${req.params.filename}`)
         res.send(file)
       } catch (error) {
         console.log('error', error)
@@ -136,7 +79,7 @@ module.exports = function (app, passport, io) {
     async (req, res) => {
       try {
         console.log(`Attempting to load a file - ${`classes/${req.params.class}/${req.params.filename}`}`);
-        const file = await loadLocalFile(req.instance, `classes/${req.params.class}/${req.params.filename}`)
+        const file = await utils.loadLocalFile(req.instance, `classes/${req.params.class}/${req.params.filename}`)
         res.send(file)
       } catch (error) {
         console.log('error', error)

@@ -1,24 +1,9 @@
-var path = require('path')
-let yaml = require('js-yaml')
-let fs = require('fs-promise')
+const path = require('path')
+const yaml = require('js-yaml')
+const fs = require('fs-promise')
 
 const User = require('../../app/models/user')
-
-function YamlObj(file, course) {
-  this.file = file
-  this.course = course
-
-  this.format = () => {
-    // this.file = formatMarkdown(this.file, this.course)
-  }
-  this.toJson = () => {
-    return yaml.safeLoad(this.file)
-  }
-}
-
-function resolve(instance, dir) {
-  return path.join(__dirname, `../../examples/${instance}`, dir)
-}
+const YamlObj = require('../utilities/yamlObj')
 
 module.exports = function (app, passport, io) {
 
@@ -37,10 +22,8 @@ module.exports = function (app, passport, io) {
       user = user.toObject()
 
       // Load course
-      let yamlObj = new YamlObj()
-      yamlObj.file = await fs.readFile(resolve(req.instance, '/course.yaml'), 'utf8')
-      yamlObj.course = req.instance
-      let course = yamlObj.toJson()
+      let yamlObj = new YamlObj(req.instance)
+      let course = await yamlObj.loadFile('/course.yaml', true)
 
       // Check if user is admin
       user.isAdmin = course.admins.indexOf(user.twitter.username.toLowerCase()) !== -1
@@ -68,6 +51,7 @@ module.exports = function (app, passport, io) {
 
   // Twitter callback
   app.get('/v1/auth/twitter/callback/:instance', function (req, res, next) {
+    console.log(`${process.env.API_URL}/auth/twitter/callback/${req.params.instance}`);
     passport.authenticate('twitter', {
       callbackURL: `${process.env.API_URL}/auth/twitter/callback/${req.params.instance}`,
       successRedirect: process.env.DEV_MODE ? `http://localhost:8080/profile` : `https://${req.params.instance}.connectedacademy.io/profile`,

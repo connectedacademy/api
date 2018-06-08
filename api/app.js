@@ -70,12 +70,12 @@ app.use(session({
     // client: ,
     // socket: ,
     // url: ,
-    host: 'redis',
-    port: 6379,
-    saveUninitialized: false
+    host: process.env.REDIS_HOST || 'redis',
+    port: 6379
   }),
   secret: process.env.PASSPORT_SESSION_SECRET || 'not_very_secret',
-  resave: false
+  resave: false,
+  saveUninitialized: true
 }))
 
 // required for passport
