@@ -63,7 +63,6 @@ module.exports = function (passport) {
   passport.use(new TwitterStrategy({
     consumerKey: configAuth.twitterAuth.clientID,
     consumerSecret: configAuth.twitterAuth.clientSecret,
-    callbackURL: configAuth.twitterAuth.callbackURL,
     passReqToCallback: true
   },
     function (req, token, tokenSecret, profile, cb) {

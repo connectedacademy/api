@@ -46,7 +46,7 @@ module.exports = function (app, passport, io) {
 
   // Twitter login
   app.get('/v1/auth/twitter/login/:instance', function (req, res, next) {
-    passport.authenticate('twitter', { callbackURL: `${process.env.API_URL}/auth/twitter/login/${req.params.instance}` })(req, res, next)
+    passport.authenticate('twitter', { callbackURL: `${process.env.API_URL}/auth/twitter/callback/${req.params.instance}` })(req, res, next)
   })
 
   // Twitter callback
