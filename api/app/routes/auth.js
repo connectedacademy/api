@@ -50,8 +50,8 @@ module.exports = function (app, passport, io) {
   })
 
   // Twitter callback
-  app.get('/v1/auth/twitter/login/:instance', function (req, res, next) {
-    console.log(`${process.env.API_URL}/auth/twitter/login/${req.params.instance}`);
+  app.get('/v1/auth/twitter/callback/:instance', function (req, res, next) {
+    console.log(`${process.env.API_URL}/auth/twitter/callback/${req.params.instance}`);
     passport.authenticate('twitter', {
       callbackURL: `${process.env.API_URL}/auth/twitter/login/${req.params.instance}`,
       successRedirect: process.env.DEV_MODE ? `http://localhost:8080/profile` : `https://${req.params.instance}.connectedacademy.io/profile`,
