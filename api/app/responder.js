@@ -35,7 +35,7 @@ const loopMessages = async function (io) {
       const data = {
         _user: user._id,
         _parent: message._id,
-        course: 'rocket',
+        course: process.env.DEFAULT_INSTANCE,
         class: message.class,
         segment: message.segment,
         segmentGroup: message.segmentGroup,

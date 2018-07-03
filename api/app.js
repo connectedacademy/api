@@ -9,6 +9,7 @@ const port = process.env.PORT || 3000
 const passport = require('passport')
 const flash = require('connect-flash')
 const serveStatic = require('serve-static')
+const fileUpload = require('express-fileupload')
 
 const morgan = require('morgan')
 const cookieParser = require('cookie-parser')
@@ -49,6 +50,7 @@ app.use(morgan('dev')) // log every request to the console
 app.use(cookieParser()) // read cookies (needed for auth)
 app.use(bodyParser.json())
 app.use(serveStatic(path.join(__dirname, 'examples')))
+app.use(fileUpload())
 
 // Instance middleware
 app.use(function (req, res, next) {
@@ -58,7 +60,8 @@ app.use(function (req, res, next) {
     const matches = url.match(/^https?:\/\/([^/?#]+)(?:[/?#]|$)/i)
     const domain = matches[1]
     const subdomain = domain.split('.')[0]
-    instance = (subdomain.indexOf('localhost') !== -1) ? 'rocket' : subdomain
+    // Set default instance if on localhost
+    instance = (subdomain.indexOf('localhost') !== -1) ? process.env.DEFAULT_INSTANCE : subdomain
   }
   req.instance = instance
 

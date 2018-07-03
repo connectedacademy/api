@@ -56,7 +56,7 @@ module.exports = function (app, passport, io) {
     async (req, res) => {
       const data = {
         _user: req.user,
-        course: 'rocket',
+        course: req.instance,
         class: req.body.class,
         content: req.body.content,
         url: req.body.url,

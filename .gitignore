@@ -3,3 +3,5 @@
 .caddy
 api/examples/doa
 api/examples/ml
+.DS_Store
+aws/*/node_modules
