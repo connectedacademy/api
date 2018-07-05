@@ -1,5 +1,6 @@
 const moment = require('moment')
 const fs = require('fs-promise')
+const YAML = require('json2yaml')
 
 const _find = require('lodash/find')
 const _reduce  = require('lodash/reduce')
@@ -157,15 +158,43 @@ module.exports = function (app, passport, io) {
       let s3filename = `${req.instance}-${req.body.theClass}`
       switch (req.body.type) {
         case 'introAudioFile':
-          s3filename = s3filename + '-intro'
+          // Generate unique filename
+          s3filename = s3filename + `-${Date.now()}-intro`
           break
         case 'mainAudioFile':
+          // Overwrite previous file
           s3filename = s3filename + '-main'
           break
       }
 
       // Upload to S3
       let result = await media.uploadFile(uploadPath, s3filename)
+
+      // Add new intro to class config
+      if (req.body.type === 'introAudioFile') {
+        // Load config
+        let yamlObj = new YamlObj(req.instance)
+        const configPath = `/classes/${req.body.theClass}/config.yaml`
+        let theClass = await yamlObj.loadFile(configPath, true)
+
+        // Get location
+        let location = result
+        location = location.replace('.mp3', '-64.mp3')
+        location = location.replace('audio', process.env.ENCODED_AUDIO_URI)
+
+        // Push onto intros array
+        let newIntro = {
+          audio: location,
+          title: 'Introduction'
+        }
+        theClass.content[1].intros.push(newIntro)
+
+        let yamlPath = utils.resolve(req.instance, configPath)
+        let toWrite = YAML.stringify(theClass)
+
+        let yamlFile = await fs.writeFile(yamlPath, toWrite)
+        yamlFile = await fs.readFile(yamlPath)
+      }
       res.send(result)
     }
   )
