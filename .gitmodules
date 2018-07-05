@@ -1,6 +1,8 @@
 [submodule "app"]
 	path = app
 	url = git@github.com:connectedacademy/elevator.git
+        branch = master
 [submodule "api/examples/rocket"]
 	path = api/examples/rocket
 	url = git@github.com:connectedacademy/rocket.git
+        branch = master
