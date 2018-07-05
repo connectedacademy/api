@@ -1,7 +1,8 @@
 const moment = require('moment')
 const fs = require('fs-promise')
 
-const _find  = require('lodash/find')
+const _find = require('lodash/find')
+const _reduce  = require('lodash/reduce')
 
 const utils = require('../utilities/utils.js')()
 const YamlObj = require('../utilities/yamlObj')
@@ -76,6 +77,25 @@ module.exports = function (app, passport, io) {
       } catch (error) {
         console.log('error', error)
         res.send('Failed to load media')
+      }
+    })
+    
+  // Get class suggestions
+  app.get('/v1/suggestions/:class',
+    async (req, res) => {
+      try {
+        const filename = `${req.params.class}-prompts`
+        console.log(`Attempting to load a file - ${`classes/${req.params.class}/${filename}`}`);
+        const file = await utils.loadLocalFile(req.instance, `classes/${req.params.class}/${filename}`)
+        const result = _reduce(JSON.parse(file), function (result, value, key) {
+          if (!result) result = []
+          result[Math.floor(value.start / 5)] = value.text
+          return result
+        }, {})
+        res.send(result)
+      } catch (error) {
+        console.log('error', error)
+        res.send('Failed to load suggestions')
       }
     })
 
@@ -158,6 +178,9 @@ module.exports = function (app, passport, io) {
       const theClass = req.params.class
       const filename = `${course}-${theClass}-main.json`
       let result = await media.fetchTranscription(course, theClass, filename)
+
+      console.log('Fetch transcription result', result)
+      
       res.send('done')
     }
   )
