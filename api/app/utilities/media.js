@@ -7,7 +7,6 @@ const fs = require('fs-extra')
 const configAWS = require('../../config/aws.js')
 const utils = require('../utilities/utils.js')()
 
-const S3_DIR = configAWS.s3Dir
 const S3_BUCKET = configAWS.s3Bucket
 const TRANSCRIPTS_URI = configAWS.transcriptsUri
 

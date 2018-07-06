@@ -1,5 +1,5 @@
 const LocalStrategy = require('passport-local').Strategy
-const TwitterStrategy = require('passport-twitter').Strategy;
+const TwitterStrategy = require('passport-twitter').Strategy
 const User = require('../app/models/user')
 
 const configAuth = require('./auth')
@@ -68,35 +68,31 @@ module.exports = function (passport) {
   },
     function (req, token, tokenSecret, profile, cb) {
 
-      process.nextTick(function () {
+      User.findOne({ 'twitter.id': profile.id }, function (err, user) {
 
-        User.findOne({ 'twitter.id': profile.id }, function (err, user) {
+        if (err) { return cb(err, user, req.query.instance) }
 
-          if (err) { return cb(err, user, req.query.instance) }
+        if (user) { return cb(null, user, req.query.instance) }
 
-          if (user) { return cb(null, user, req.query.instance) }
+        let newUser = new User()
 
-          let newUser = new User()
+        newUser.twitter.id = profile.id
+        newUser.twitter.token = tokenSecret
+        newUser.twitter.username = profile.username
+        newUser.twitter.displayName = profile.displayName
 
-          newUser.twitter.id = profile.id
-          newUser.twitter.token = tokenSecret
-          newUser.twitter.username = profile.username
-          newUser.twitter.displayName = profile.displayName
+        newUser.profile.avatar = profile.profile_image_url
+        newUser.profile.name = profile.displayName
 
-          newUser.profile.avatar = profile.profile_image_url
-          newUser.profile.name = profile.displayName
+        if (profile.photos && (profile.photos.length > 0)) {
+          newUser.profile.avatar = profile.photos[0].value
+        }
 
-          if (profile.photos && (profile.photos.length > 0)) {
-            newUser.profile.avatar = profile.photos[0].value
-          }
-
-          newUser.save(function (err) {
-            if (err) { throw err }
-            return cb(err, newUser, req.query.instance)
-          })
+        newUser.save(function (err) {
+          if (err) { throw err }
+          return cb(err, newUser, req.query.instance)
         })
       })
-
     }
   ))
 }
