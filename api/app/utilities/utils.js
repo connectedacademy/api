@@ -37,7 +37,7 @@ module.exports = function () {
           const text = transcript.text.replace(/<br \/>/g, ' ')
           theTranscript[segmentGroup] = (theTranscript[segmentGroup]) ? theTranscript[segmentGroup] + ' ' + text : text
         }
-        jsonFile = await fs.writeFile(jsonPath, JSON.stringify(theTranscript))
+        jsonFile = await fs.writeFile(jsonPath, JSON.stringify(theTranscript, null, "\t"))
       } finally {
         console.log('JSON found');
         jsonFile = await fs.readFile(jsonPath, 'utf8')
@@ -57,7 +57,7 @@ module.exports = function () {
       } catch (error) {
         console.log('JSON not found - writing..');
         let file = await fs.readFile(srtPath, 'utf8')
-        jsonFile = await fs.writeFile(jsonPath, JSON.stringify(parseSRT(file)))
+        jsonFile = await fs.writeFile(jsonPath, JSON.stringify(parseSRT(file), null, "\t"))
       } finally {
         console.log('JSON found');
         jsonFile = await fs.readFile(jsonPath, 'utf8')

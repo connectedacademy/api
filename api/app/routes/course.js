@@ -131,7 +131,7 @@ module.exports = function (app, passport, io) {
         json[req.body.id] = req.body.text
         
         let jsonPath = utils.resolve(req.instance, `classes/${req.body.theClass}/${content.transcript}.json`)
-        let toWrite = JSON.stringify(json)
+        let toWrite = JSON.stringify(json, null, "\t")
         
         let jsonFile = await fs.writeFile(jsonPath, toWrite)
         jsonFile = await fs.readFile(jsonPath)
