@@ -1,3 +1,12 @@
+doa.connectedacademy.io {
+  root /var/www/html
+  tls admin@connectedacademy.io
+
+  rewrite {
+    to {path} {path}/ /index.html
+  }
+}
+
 ml.connectedacademy.io {
   root /var/www/html
   tls admin@connectedacademy.io
