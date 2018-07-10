@@ -44,7 +44,7 @@ module.exports = function (app, passport, io) {
       const data = {
         _user: req.user,
         _parent: req.body.replyTo,
-        course: 'rocket',
+        course: req.instance,
         class: req.body.currentClass,
         segment: req.body.currentSegmentGroup,
         segmentGroup: req.body.currentSegmentGroup,
