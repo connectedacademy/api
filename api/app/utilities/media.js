@@ -52,7 +52,7 @@ async function storeTranscription(course, theClass, transcription) {
   console.log('storeTranscription called')
   
   try {
-    let jsonPath = utils.resolve(course, `classes/${theClass}/${theClass}-transcript.json`)
+    let jsonPath = utils.resolve(course, `classes/${theClass}/transcript.json`)
     let jsonFile = await fs.writeFile(jsonPath, transcription)
     jsonFile = await fs.readFile(jsonPath)
 
@@ -65,13 +65,13 @@ async function storeTranscription(course, theClass, transcription) {
 
 module.exports = function () {
   return {
-    uploadFile: async (path, filename) => {
+    uploadFile: async (path, filename, type) => {
       console.log('uploadFile called')
 
       let file = await fs.readFile(path)
       return new Promise(function (resolve, reject) {
-        const key = `audio/${filename}.mp3`
-        params = { Bucket: S3_BUCKET, Key: key, Body: file, ACL: 'public-read', ContentType: 'audio/mp3' }
+        const key = (type === 'audio') ? `audio/${filename}.mp3` : `media/${filename}.jpg`
+        params = { Bucket: S3_BUCKET, Key: key, Body: file, ACL: 'public-read', ContentType: (type === 'audio') ? 'audio/mp3' : 'image/jpeg' }
         awsS3.putObject(params, function (err, data) {
           if (err) {
             console.log(err)

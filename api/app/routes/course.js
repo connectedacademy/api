@@ -69,11 +69,11 @@ module.exports = function (app, passport, io) {
     })
 
   // Get class media
-  app.get('/v1/media/:class/:filename',
+  app.get('/v1/media/:class',
     async (req, res) => {
       try {
-        console.log(`Attempting to load a file - ${`classes/${req.params.class}/${req.params.filename}`}`);
-        const file = await utils.loadLocalFile(req.instance, `classes/${req.params.class}/${req.params.filename}`)
+        console.log(`Attempting to load a file - ${`classes/${req.params.class}/media`}`);
+        const file = await utils.loadLocalFile(req.instance, `classes/${req.params.class}/media`)
         res.send(file)
       } catch (error) {
         console.log('error', error)
@@ -81,31 +81,25 @@ module.exports = function (app, passport, io) {
       }
     })
     
-  // Get class suggestions
-  app.get('/v1/suggestions/:class',
+  // Get class prompts
+  app.get('/v1/prompts/:class',
     async (req, res) => {
       try {
-        const filename = `${req.params.class}-prompts`
-        console.log(`Attempting to load a file - ${`classes/${req.params.class}/${filename}`}`);
-        const file = await utils.loadLocalFile(req.instance, `classes/${req.params.class}/${filename}`)
-        const result = _reduce(JSON.parse(file), function (result, value, key) {
-          if (!result) result = []
-          result[Math.floor(value.start / 5)] = value.text
-          return result
-        }, {})
-        res.send(result)
+        console.log(`Attempting to load a file - ${`classes/${req.params.class}/prompts`}`);
+        const file = await utils.loadLocalFile(req.instance, `classes/${req.params.class}/prompts`)
+        res.send(file)
       } catch (error) {
         console.log('error', error)
-        res.send('Failed to load suggestions')
+        res.send('Failed to load prompts')
       }
     })
 
   // Get class transcript
-  app.get('/v1/transcript/:class/:filename',
+  app.get('/v1/transcript/:class',
     async (req, res) => {
       try {
-        console.log(`Attempting to load a file - ${`classes/${req.params.class}/${req.params.filename}`}`);
-        const file = await utils.loadLocalTranscript(req.instance, `classes/${req.params.class}/${req.params.filename}`)
+        console.log(`Attempting to load a file - ${`classes/${req.params.class}/transcript`}`);
+        const file = await utils.loadLocalTranscript(req.instance, `classes/${req.params.class}/transcript`)
         res.send(file)
       } catch (error) {
         console.log('error', error)
@@ -117,29 +111,49 @@ module.exports = function (app, passport, io) {
   app.post('/v1/transcript/:class',
     async (req, res) => {
       try {
-        let yamlObj = new YamlObj(req.instance)
-        let theClass = await yamlObj.loadFile(`/classes/${req.body.theClass}/config.yaml`, true)
-        console.log(`Updating transcript for ${req.body.theClass}`)
-        let content = _find(theClass.content, { type: 'liveclass' })
+        console.log(`Attempting to load a file - ${`classes/${req.body.theClass}/transcript`}`);
+        const file = await utils.loadLocalFile(req.instance, `classes/${req.body.theClass}/transcript`)
 
-        console.log(`Attempting to load a file - ${`classes/${req.body.theClass}/${content.transcript}`}`);
-        const file = await utils.loadLocalFile(req.instance, `classes/${req.body.theClass}/${content.transcript}`)
-        
         // Update file and save
         let json = JSON.parse(file)
-      
+
         json[req.body.id] = req.body.text
-        
-        let jsonPath = utils.resolve(req.instance, `classes/${req.body.theClass}/${content.transcript}.json`)
+
+        let jsonPath = utils.resolve(req.instance, `classes/${req.body.theClass}/transcript.json`)
         let toWrite = JSON.stringify(json, null, "\t")
-        
+
         let jsonFile = await fs.writeFile(jsonPath, toWrite)
         jsonFile = await fs.readFile(jsonPath)
-        
+
         res.send(JSON.parse(jsonFile))
       } catch (error) {
         console.log('error', error)
         res.send('Failed to update transcript')
+      }
+    })
+
+  // Update class prompts
+  app.post('/v1/prompts/:class',
+    async (req, res) => {
+      try {
+        console.log(`Attempting to load a file - ${`classes/${req.body.theClass}/prompts`}`);
+        const file = await utils.loadLocalFile(req.instance, `classes/${req.body.theClass}/prompts`)
+
+        // Update file and save
+        let json = JSON.parse(file)
+
+        json[req.body.id] = req.body.text
+
+        let jsonPath = utils.resolve(req.instance, `classes/${req.body.theClass}/prompts.json`)
+        let toWrite = JSON.stringify(json, null, "\t")
+
+        let jsonFile = await fs.writeFile(jsonPath, toWrite)
+        jsonFile = await fs.readFile(jsonPath)
+
+        res.send(JSON.parse(jsonFile))
+      } catch (error) {
+        console.log('error', error)
+        res.send('Failed to update prompts')
       }
     })
 
@@ -168,7 +182,7 @@ module.exports = function (app, passport, io) {
       }
 
       // Upload to S3
-      let result = await media.uploadFile(uploadPath, s3filename)
+      let result = await media.uploadFile(uploadPath, s3filename, 'audio')
 
       // Add new intro to class config
       if (req.body.type === 'introAudioFile') {
@@ -196,6 +210,49 @@ module.exports = function (app, passport, io) {
         yamlFile = await fs.readFile(yamlPath)
       }
       res.send(result)
+    }
+  )
+
+  // Upload media to S3
+  app.post('/v1/media/upload',
+    async (req, res) => {
+
+      const upload = req.files.upload
+
+      // Save file locally
+      const uploadPath = utils.resolve(req.instance, `media/${upload.name}`)
+      const uploadedFile = await fs.writeFile(uploadPath, req.files.upload.data)
+
+      console.log('uploadedFile', uploadedFile)
+
+      let s3filename = `${req.instance}-${req.body.theClass}`
+      
+      // Generate unique filename
+      s3filename = s3filename + `-${Date.now()}-media`
+
+      // Upload to S3
+      let result = await media.uploadFile(uploadPath, s3filename, 'media')
+
+      console.log(`Attempting to load a file - ${`classes/${req.body.theClass}/media`}`);
+      const file = await utils.loadLocalFile(req.instance, `classes/${req.body.theClass}/media`)
+
+      console.log('result', result)
+      
+      // Update file and save
+      let json = JSON.parse(file)
+      json[req.body.theSegment] = {
+        text: `${process.env.S3_URI}/${result}`
+      }
+
+      console.log('json', json)
+
+      let jsonPath = utils.resolve(req.instance, `classes/${req.body.theClass}/media.json`)
+      let toWrite = JSON.stringify(json, null, "\t")
+
+      let jsonFile = await fs.writeFile(jsonPath, toWrite)
+      jsonFile = await fs.readFile(jsonPath)
+
+      res.send(JSON.parse(jsonFile))
     }
   )
 
