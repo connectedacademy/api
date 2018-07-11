@@ -241,7 +241,7 @@ module.exports = function (app, passport, io) {
       // Update file and save
       let json = JSON.parse(file)
       json[req.body.theSegment] = {
-        text: `${process.env.S3_URI}/${result}`
+        text: `${result}`
       }
 
       console.log('json', json)
@@ -270,4 +270,44 @@ module.exports = function (app, passport, io) {
       res.send('done')
     }
   )
+
+  // Convert existing media
+  app.get('/convert', async (req, res) => {
+
+    return res.send('Disabled')
+    
+    // Load files
+    const file = await utils.loadLocalFile('rocket', `classes/coming-clean/media`)
+    let jsonPath = utils.resolve('rocket', `classes/coming-clean/media.json`)
+
+    let json = JSON.parse(file)
+
+    // Loop files
+    for (const key in json) {
+
+      let thePath = `media/${json[key].text}`
+      
+      const uploadPath = utils.resolve('rocket', thePath)
+
+      // Generate unique filename
+      let s3filename = `rocket-coming-clean-${Date.now()}-media`
+
+      // Upload to S3
+      let result = await media.uploadFile(uploadPath, s3filename, 'media')
+      console.log('result', result)
+      
+      // Update file and save
+      json[key] = {
+        text: `${result}`
+      }
+
+      let toWrite = JSON.stringify(json, null, "\t")
+
+      // Write file
+      let jsonFile = await fs.writeFile(jsonPath, toWrite)
+      jsonFile = await fs.readFile(jsonPath)
+    }
+    let jsonFile = await fs.readFile(jsonPath)
+    res.send(jsonFile)
+  })
 }
