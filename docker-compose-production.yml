@@ -27,6 +27,17 @@ services:
     depends_on:
       - redis
 
+  gate:
+    build: ./gate
+    restart: always
+    volumes:
+      - ./gate:/app
+    links:
+      - redis
+      - mongo
+    depends_on:
+      - redis
+
   mongo:
     build: ./docker/mongo
     restart: always
