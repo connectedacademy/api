@@ -1,21 +1,4 @@
-doa.connectedacademy.io {
-  root /var/www/html
-  tls admin@connectedacademy.io
-
-  rewrite {
-    to {path} {path}/ /index.html
-  }
-}
-
-ml.connectedacademy.io {
-  root /var/www/html
-  tls admin@connectedacademy.io
-
-  rewrite {
-    to {path} {path}/ /index.html
-  }
-}
-
+# Test instance
 rocket.connectedacademy.io {
   root /var/www/html
   tls admin@connectedacademy.io
@@ -25,6 +8,47 @@ rocket.connectedacademy.io {
   }
 }
 
+# Depictions of Addiction
+doa.connectedacademy.io {
+  root /var/www/html
+  tls admin@connectedacademy.io
+
+  rewrite {
+    to {path} {path}/ /index.html
+  }
+}
+
+# Mars - test instance
+mars.connectedacademy.io {
+  root /var/www/html
+  tls admin@connectedacademy.io
+
+  rewrite {
+    to {path} {path}/ /index.html
+  }
+}
+
+# Pluto - test instance
+pluto.connectedacademy.io {
+  root /var/www/html
+  tls admin@connectedacademy.io
+
+  rewrite {
+    to {path} {path}/ /index.html
+  }
+}
+
+# Machine Learning
+ml.connectedacademy.io {
+  root /var/www/html
+  tls admin@connectedacademy.io
+
+  rewrite {
+    to {path} {path}/ /index.html
+  }
+}
+
+# API
 api.connectedacademy.io {
   timeouts 10m
   proxy / api:3000 {
