@@ -1,7 +1,6 @@
 .vscode
 .env
 .caddy
-api/examples/doa
-api/examples/ml
+api/examples/*
 .DS_Store
 aws/*/node_modules
