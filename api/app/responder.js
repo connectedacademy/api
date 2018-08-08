@@ -63,7 +63,7 @@ const loopMessages = async function (io) {
 
 module.exports = function (io) {
   return {
-    begin: async () => {
+    start: async () => {
       console.log('Starting responder...')
       while (true) {
         const result = await loopMessages(io)

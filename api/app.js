@@ -70,9 +70,6 @@ app.use(function (req, res, next) {
 
 app.use(session({
   store: new RedisStore({
-    // client: ,
-    // socket: ,
-    // url: ,
     host: process.env.REDIS_HOST || 'redis',
     port: 6379
   }),
@@ -112,11 +109,17 @@ fakeActivity = () => {
 
 fakeResponder = () => {
   const responder = require('./app/responder.js')(io)
-  responder.begin()
+  responder.start()
+}
+
+startListener = () => {
+  const listener = require('./app/listener.js')(io)
+  listener.start()
 }
 
 http.listen(port, () => {
   console.log(`Listening on port ${port}!`)
   // fakeActivity()
   // fakeResponder()
+  startListener()
 })

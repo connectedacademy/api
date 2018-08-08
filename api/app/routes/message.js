@@ -2,45 +2,35 @@ const User = require('../../app/models/user')
 const Message = require('../../app/models/message')
 const Classroom = require('../../app/models/classroom')
 
+const twitter = require('../utilities/twitter.js')()
+const visualisation = require('../utilities/visualisation.js')()
+
 module.exports = function (app, passport, io) {
   
   // Get visualisation for given class and duration
   app.get('/v1/messages/vis/:class/:duration',
     async (req, res) => {
+
+      // Get data points
       let vis = await Message.aggregate([{ $match: { class: req.params.class } }, { $group: { _id: "$segment", count: { $sum: 1 } } }])
-      let max = Math.max.apply(Math, vis.map(o => o.count))
-      let visualisation = {}, groups = {}
-
-      for (let v of vis) {
-        const segment = parseInt(v._id)
-        let percent = Math.floor((segment / (req.params.duration / 5)) * 100)
-        let val = parseInt(v.count) / max
-        
-        if (visualisation[percent]) {
-          visualisation[percent] += val
-          groups[percent] = groups[percent] ? groups[percent] + 1 : 2
-          continue
-        }
-        visualisation[percent] = val
-      }
-
-      for (let key in groups) {
-        visualisation[key] = visualisation[key] / groups[key]
-      }
-
-      let fill = 0
-      while (fill <= 100) {
-        visualisation[fill] = visualisation[fill] ? visualisation[fill] : 0
-        fill++
-      }
-
-      res.json({ visualisation })
+      
+      // Return formatted visualisation
+      res.json({ visualisation: visualisation.format(vis, req.params.duration) })
     })
 
   // Create message
   app.post('/v1/messages/create',
     async (req, res) => {
+      
+      const TWITTER_ENABLED = true
 
+      // TODO: Check tweeting enabled
+      if (TWITTER_ENABLED) {
+        // Post tweet
+        twitter.sendTweet(req.user, req.body.text)
+        return res.json({ msg: 'Sent tweet' })
+      }
+        
       const data = {
         _user: req.user,
         _parent: req.body.replyTo,
@@ -81,7 +71,7 @@ module.exports = function (app, passport, io) {
       // Notify users
       io.to('class').emit('message', message)
       io.to('class').emit('visualisation', 'Updated')
-      
+    
       res.json(response)
     }
   )
@@ -109,8 +99,8 @@ module.exports = function (app, passport, io) {
         for (let index = 0; index < segmentCount; index++) {
           const currentSegment = parseInt(req.params.start) + index
           let message = await Message.findOne({ class: req.params.class, segment: currentSegment }).sort({ created: -1 })
-          const messageCount = await Message.count({ class: req.params.class, segment: currentSegment })
           if (message) {
+            const messageCount = await Message.count({ class: req.params.class, segment: currentSegment })
             message = message.toObject()
             message.total = messageCount
             messages.push(message)

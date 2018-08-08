@@ -16,6 +16,7 @@ const userSchema = mongoose.Schema({
   twitter: {
     id: String,
     token: String,
+    tokenSecret: String,
     username: String,
     displayName: String
   },

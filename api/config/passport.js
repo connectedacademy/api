@@ -66,32 +66,37 @@ module.exports = function (passport) {
     callbackURL: configAuth.twitterAuth.callbackURL,
     passReqToCallback: true
   },
-    function (req, token, tokenSecret, profile, cb) {
+    async function (req, token, tokenSecret, profile, cb) {
 
-      User.findOne({ 'twitter.id': profile.id }, function (err, user) {
+      let user = await User.findOne({ 'twitter.id': profile.id })
 
-        if (err) { return cb(err, user, req.query.instance) }
+      if (user) {
+        // Update tokens
+        user.twitter.token = token
+        user.twitter.tokenSecret = tokenSecret
+        user = await user.save()
 
-        if (user) { return cb(null, user, req.query.instance) }
+        return cb(null, user, req.query.instance)
+      }
 
-        let newUser = new User()
+      let newUser = new User()
 
-        newUser.twitter.id = profile.id
-        newUser.twitter.token = tokenSecret
-        newUser.twitter.username = profile.username
-        newUser.twitter.displayName = profile.displayName
+      newUser.twitter.id = profile.id
+      newUser.twitter.token = token
+      newUser.twitter.tokenSecret = tokenSecret
+      newUser.twitter.username = profile.username
+      newUser.twitter.displayName = profile.displayName
 
-        newUser.profile.avatar = profile.profile_image_url
-        newUser.profile.name = profile.displayName
+      newUser.profile.avatar = profile.profile_image_url
+      newUser.profile.name = profile.displayName
 
-        if (profile.photos && (profile.photos.length > 0)) {
-          newUser.profile.avatar = profile.photos[0].value
-        }
+      if (profile.photos && (profile.photos.length > 0)) {
+        newUser.profile.avatar = profile.photos[0].value
+      }
 
-        newUser.save(function (err) {
-          if (err) { throw err }
-          return cb(err, newUser, req.query.instance)
-        })
+      newUser.save(function (err) {
+        if (err) { throw err }
+        return cb(err, newUser, req.query.instance)
       })
     }
   ))

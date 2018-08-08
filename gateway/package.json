@@ -1,0 +1,18 @@
+{
+  "name": "gateway",
+  "version": "1.0.0",
+  "description": "A gateway to Twitter",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon -x 'node --harmony' -L app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Edward Jenkins",
+  "license": "MIT",
+  "dependencies": {
+    "dotenv": "^6.0.0",
+    "events": "^3.0.0",
+    "redis": "^2.8.0",
+    "twitter": "^1.7.1"
+  }
+}
