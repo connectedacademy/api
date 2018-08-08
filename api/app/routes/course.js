@@ -244,6 +244,10 @@ module.exports = function (app, passport, io) {
         text: `${result}`
       }
 
+      json = json.map(o => {
+        return o || { text: undefined }
+      })
+
       console.log('json', json)
 
       let jsonPath = utils.resolve(req.instance, `classes/${req.body.theClass}/media.json`)
