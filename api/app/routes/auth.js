@@ -1,7 +1,3 @@
-const path = require('path')
-const yaml = require('js-yaml')
-const fs = require('fs-promise')
-
 const User = require('../../app/models/user')
 const YamlObj = require('../utilities/yamlObj')
 
@@ -20,6 +16,13 @@ module.exports = function (app, passport, io) {
       // Find user
       let user = await User.findOne({ _id: req.user._id })
       user = user.toObject()
+
+      // Remove sensitive values
+      delete user.twitter.token
+      delete user.twitter.tokenSecret
+
+      // Log user
+      console.log('user', user)
 
       // Load course
       let yamlObj = new YamlObj(req.instance)
