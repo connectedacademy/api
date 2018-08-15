@@ -2,9 +2,6 @@ const moment = require('moment')
 const fs = require('fs-promise')
 const YAML = require('json2yaml')
 
-const _find = require('lodash/find')
-const _reduce  = require('lodash/reduce')
-
 const utils = require('../utilities/utils.js')()
 const YamlObj = require('../utilities/yamlObj')
 const media = require('../utilities/media.js')()
@@ -206,8 +203,7 @@ module.exports = function (app, passport, io) {
         let yamlPath = utils.resolve(req.instance, configPath)
         let toWrite = YAML.stringify(theClass)
 
-        let yamlFile = await fs.writeFile(yamlPath, toWrite)
-        yamlFile = await fs.readFile(yamlPath)
+        await fs.writeFile(yamlPath, toWrite)
       }
       res.send(result)
     }
@@ -308,8 +304,8 @@ module.exports = function (app, passport, io) {
       let toWrite = JSON.stringify(json, null, "\t")
 
       // Write file
-      let jsonFile = await fs.writeFile(jsonPath, toWrite)
-      jsonFile = await fs.readFile(jsonPath)
+      await fs.writeFile(jsonPath, toWrite)
+      await fs.readFile(jsonPath)
     }
     let jsonFile = await fs.readFile(jsonPath)
     res.send(jsonFile)
