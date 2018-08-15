@@ -1,4 +1,3 @@
-const User = require('../../app/models/user')
 const Homework = require('../../app/models/homework')
 const HomeworkMessage = require('../../app/models/homework-message')
 
