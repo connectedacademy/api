@@ -96,6 +96,7 @@ app.get('/',
 require('./app/routes/auth.js')(app, passport, io)
 require('./app/routes/classroom.js')(app, passport, io)
 require('./app/routes/course.js')(app, passport, io)
+require('./app/routes/editor.js')(app, passport, io)
 require('./app/routes/homework.js')(app, passport, io)
 require('./app/routes/message.js')(app, passport, io)
 require('./app/routes/user.js')(app, passport, io)
