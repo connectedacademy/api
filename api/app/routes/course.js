@@ -193,12 +193,13 @@ module.exports = function (app, passport, io) {
       // Upload to S3
       let result = await media.uploadFile(uploadPath, s3filename, 'audio')
 
+      // Load config
+      let yamlObj = new YamlObj(req.instance)
+      const configPath = `/classes/${req.body.theClass}/config.yaml`
+      let theClass = await yamlObj.loadFile(configPath, true)
+
       // Add new intro to class config
       if (req.body.type === 'introAudioFile') {
-        // Load config
-        let yamlObj = new YamlObj(req.instance)
-        const configPath = `/classes/${req.body.theClass}/config.yaml`
-        let theClass = await yamlObj.loadFile(configPath, true)
 
         // Get location
         let location = result
@@ -210,13 +211,40 @@ module.exports = function (app, passport, io) {
           audio: location,
           title: 'Introduction'
         }
-        theClass.content[1].intros.push(newIntro)
 
-        let yamlPath = utils.resolve(req.instance, configPath)
-        let toWrite = YAML.stringify(theClass)
-
-        await fs.writeFile(yamlPath, toWrite)
+        // TODO: support dynamic class position
+        if (typeof theClass.content[1].intros == 'array') {
+          theClass.content[1].intros.push(newIntro)
+        } else {          
+          theClass.content[1].intros = [newIntro]
+        }
       }
+
+      // Add new intro to class config
+      if (req.body.type === 'mainAudioFile') {
+
+        // Get location mp3
+        let locationMp3 = result
+        locationMp3 = locationMp3.replace('.mp3', '-64.mp3')
+        locationMp3 = locationMp3.replace('audio', process.env.ENCODED_AUDIO_URI)
+        
+        // Get location webm
+        let locationWebm = result
+        locationWebm = locationWebm.replace('.mp3', '-64.webm')
+        locationWebm = locationWebm.replace('audio', process.env.ENCODED_AUDIO_URI)
+
+        // TODO: support dynamic class position
+        theClass.content[1].audio = [
+          locationMp3,
+          locationWebm
+        ]
+      }
+
+      let yamlPath = utils.resolve(req.instance, configPath)
+      let toWrite = YAML.stringify(theClass)
+
+      await fs.writeFile(yamlPath, toWrite)
+
       res.send(result)
     }
   )
