@@ -9,7 +9,7 @@ rocket.connectedacademy.io {
 }
 
 # Depictions of Addiction
-doa.connectedacademy.io {
+addiction.connectedacademy.io {
   root /var/www/html
   tls admin@connectedacademy.io
 

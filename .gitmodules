@@ -2,7 +2,11 @@
 	path = app
 	url = git@github.com:connectedacademy/elevator.git
         branch = master
-[submodule "api/examples/rocket"]
-	path = api/examples/rocket
-	url = git@github.com:connectedacademy/rocket.git
+[submodule "api/examples/addiction"]
+	path = api/examples/addiction
+	url = git@github.com:connectedacademy/addiction.git
+        branch = master
+[submodule "api/examples/template"]
+	path = api/examples/template
+	url = git@github.com:connectedacademy/template.git
         branch = master

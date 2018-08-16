@@ -1,5 +1,6 @@
 const mongoose = require('mongoose')
 const bcrypt = require('bcrypt-nodejs')
+const YamlObj = require('../utilities/yamlObj')
 
 const userSchema = mongoose.Schema({
 
@@ -51,6 +52,36 @@ userSchema.methods.generateHash = function (password) {
 
 userSchema.methods.validPassword = function (password) {
   return bcrypt.compareSync(password, this.local.password)
+}
+
+userSchema.methods.checkRole = async function (instance, role) {
+
+  console.log('Checking role', instance, role, this.profile.name)
+  
+  // Load course
+  let yamlObj = new YamlObj(instance)
+  let course = await yamlObj.loadFile('/course.yaml', true)
+
+  switch (role) {
+    case 'admin':
+      return course.admins.indexOf(this.twitter.username.toLowerCase()) !== -1
+    case 'teacher':
+      return course.teachers.indexOf(this.twitter.username.toLowerCase()) !== -1
+    default:
+      return false
+  }
+}
+
+userSchema.methods.setRoles = async function (instance) {
+
+  // Load course
+  let yamlObj = new YamlObj(instance)
+  let course = await yamlObj.loadFile('/course.yaml', true)
+
+  return {
+    admin: course.admins.indexOf(this.twitter.username.toLowerCase()) !== -1,
+    teacher: course.teachers.indexOf(this.twitter.username.toLowerCase()) !== -1
+  }
 }
 
 module.exports = mongoose.model('User', userSchema)

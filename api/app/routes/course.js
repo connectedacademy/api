@@ -6,6 +6,13 @@ const utils = require('../utilities/utils.js')()
 const YamlObj = require('../utilities/yamlObj')
 const media = require('../utilities/media.js')()
 
+async function ensureRole(req, role) {
+  // Ensure user has given role for instance
+  if (!await req.user.checkRole(req.instance, role)) {
+    return res.send('You must be an admin!')
+  }
+}
+
 module.exports = function (app, passport, io) {
 
   // Get course
@@ -107,6 +114,8 @@ module.exports = function (app, passport, io) {
   // Update class transcript
   app.post('/v1/transcript/:class',
     async (req, res) => {
+      await ensureRole(req, 'admin')
+      
       try {
         console.log(`Attempting to load a file - ${`classes/${req.body.theClass}/transcript`}`);
         const file = await utils.loadLocalFile(req.instance, `classes/${req.body.theClass}/transcript`)
@@ -132,6 +141,8 @@ module.exports = function (app, passport, io) {
   // Update class prompts
   app.post('/v1/prompts/:class',
     async (req, res) => {
+      await ensureRole(req, 'admin')
+
       try {
         console.log(`Attempting to load a file - ${`classes/${req.body.theClass}/prompts`}`);
         const file = await utils.loadLocalFile(req.instance, `classes/${req.body.theClass}/prompts`)
@@ -157,6 +168,7 @@ module.exports = function (app, passport, io) {
   // Upload audio to S3
   app.post('/v1/audio/upload',
     async (req, res) => {
+      await ensureRole(req, 'admin')
 
       const file = req.files.upload
 
@@ -212,6 +224,7 @@ module.exports = function (app, passport, io) {
   // Upload media to S3
   app.post('/v1/media/upload',
     async (req, res) => {
+      await ensureRole(req, 'admin')
 
       const upload = req.files.upload
 
@@ -259,6 +272,7 @@ module.exports = function (app, passport, io) {
   // Fetch transcription for given class
   app.get('/v1/transcription/fetch/:class',
     async (req, res) => {
+      await ensureRole(req, 'admin')
 
       const course = req.instance
       const theClass = req.params.class
@@ -273,6 +287,7 @@ module.exports = function (app, passport, io) {
 
   // Convert existing media
   app.get('/convert', async (req, res) => {
+    await ensureRole(req, 'admin')
 
     return res.send('Disabled')
     

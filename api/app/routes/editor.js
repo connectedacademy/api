@@ -16,11 +16,20 @@ async function saveConfig(instance, classConfig, path) {
   await fs.writeFile(filePath, toWrite)
 }
 
+async function ensureRole(req, role) {
+  // Ensure user has given role for instance
+  if (!await req.user.checkRole(req.instance, role)) {
+    return res.send('You must be an admin!')
+  }
+}
+
 module.exports = function (app, passport, io) {
   
   // Save content
   app.post('/v1/editor/save/:type',
     async (req, res) => {
+      await ensureRole(req, 'admin')
+
       let yamlObj = new YamlObj(req.instance)
       const courseConfigPath = '/course.yaml'
       
@@ -63,13 +72,14 @@ module.exports = function (app, passport, io) {
         const classConfigPath = `/classes/${req.body.class}/config.yaml`
         
         let classConfig = await yamlObj.loadFile(classConfigPath, true)
-
+        
         // Load content from JSON that is to be updated
         classConfig.content[req.body.index] = {
           ...classConfig.content[req.body.index],
-          title: req.body.title,
-          description: req.body.description
+          ...req.body.properties
         }
+        console.log('classConfig.content[req.body.index]', classConfig.content[req.body.index])
+        
 
         await saveConfig(req.instance, classConfig, classConfigPath)
 

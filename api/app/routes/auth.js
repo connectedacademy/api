@@ -1,5 +1,4 @@
 const User = require('../../app/models/user')
-const YamlObj = require('../utilities/yamlObj')
 
 module.exports = function (app, passport, io) {
 
@@ -15,7 +14,9 @@ module.exports = function (app, passport, io) {
 
       // Find user
       let user = await User.findOne({ _id: req.user._id })
+      const roles = await user.setRoles(req.instance)
       user = user.toObject()
+      user.roles = roles
 
       // Remove sensitive values
       delete user.twitter.token
@@ -23,17 +24,6 @@ module.exports = function (app, passport, io) {
 
       // Log user
       console.log('user', user)
-
-      // Load course
-      let yamlObj = new YamlObj(req.instance)
-      let course = await yamlObj.loadFile('/course.yaml', true)
-
-      // Check if user is admin
-      user.isAdmin = course.admins.indexOf(user.twitter.username.toLowerCase()) !== -1
-      user.isTeacher = course.teachers.indexOf(user.twitter.username.toLowerCase()) !== -1
-
-      // TODO: Set user roles
-      user.roles = ['admin', 'teacher', 'user']
 
       res.json({ user: user })
     })
