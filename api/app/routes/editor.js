@@ -48,7 +48,7 @@ module.exports = function (app, passport, io) {
       }
 
       if (req.params.type === 'page') {
-        console.log('Updating page...')
+        console.log('Updating page...', req.body.path)
         await updateFile(req.instance, req.body.markdown, req.body.path)
         return res.json({ success: true })
       }
