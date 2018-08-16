@@ -48,10 +48,30 @@ ml.connectedacademy.io {
   }
 }
 
+# Staging
+staging.connectedacademy.io {
+  root /var/www/staging
+  tls admin@connectedacademy.io
+
+  rewrite {
+    to {path} {path}/ /index.html
+  }
+}
+
 # API
 api.connectedacademy.io {
   timeouts 10m
   proxy / api:3000 {
+    websocket
+    health_check /health
+    health_check_interval 10s
+  }
+}
+
+# Staging API
+stagingapi.connectedacademy.io {
+  timeouts 10m
+  proxy / stagingapi:3000 {
     websocket
     health_check /health
     health_check_interval 10s
