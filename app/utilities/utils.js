@@ -5,13 +5,13 @@ let parseSRT = require('parse-srt')
 const math = require('lodash/math')
 
 function resolve (instance, dir) {
-  return path.join(__dirname, `../../examples/${instance}`, dir)
+  return path.join(__dirname, `../../../instances/${instance}`, dir)
 }
 
 module.exports = function () {
   return {
     resolve: (instance, dir) => {
-      return path.join(__dirname, `../../examples/${instance}`, dir)
+      return path.join(__dirname, `../../../instances/${instance}`, dir)
     },
     formatMarkdown: (raw, course) => {
       return raw.replace(/CDN_URL/g, `${process.env.CDN_URL}/${course}`)

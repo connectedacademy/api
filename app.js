@@ -49,7 +49,7 @@ mongoose.connect(configDB.url) // connect to our database
 app.use(morgan('dev')) // log every request to the console
 app.use(cookieParser()) // read cookies (needed for auth)
 app.use(bodyParser.json())
-app.use(serveStatic(path.join(__dirname, 'examples')))
+app.use(serveStatic(path.join(__dirname, '../instances')))
 app.use(fileUpload())
 
 // Instance middleware
