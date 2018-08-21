@@ -90,7 +90,7 @@ app.get('/health',
 
 app.get('/',
   (req, res) => {
-    res.send('Connected Academy API')
+    res.send(`Connected Academy API - ${process.env.BRANCH || 'master'}`)
   })
   
 require('./app/routes/auth.js')(app, passport, io)
@@ -119,7 +119,11 @@ startListener = () => {
 }
 
 http.listen(port, () => {
-  console.log(`Listening on port ${port}!`)
+  if (process.env.BRANCH) {
+    console.log(`Starting API on ${process.env.BRANCH} branch`)
+  } else {
+    console.log(`Listening on port ${port}!`)
+  }
   // fakeActivity()
   // fakeResponder()
   startListener()

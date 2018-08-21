@@ -12,6 +12,8 @@ RUN npm install
 
 COPY . /app
 
+COPY ../instances /app
+
 EXPOSE 3000
 
 CMD ["npm", "start"]
