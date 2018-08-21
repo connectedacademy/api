@@ -12,7 +12,7 @@ RUN npm install
 
 COPY . /app
 
-COPY ../instances /app
+# COPY ../instances /app
 
 EXPOSE 3000
 
