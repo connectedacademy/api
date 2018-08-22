@@ -61,7 +61,7 @@ app.use(function (req, res, next) {
     const domain = matches[1]
     const subdomain = domain.split('.')[0]
     // Set default instance if on localhost
-    instance = (subdomain.indexOf('localhost') !== -1) ? process.env.DEFAULT_INSTANCE : subdomain
+    instance = (domain.indexOf('local') !== -1) ? process.env.DEFAULT_INSTANCE : subdomain
   }
   req.instance = instance
 
@@ -90,7 +90,7 @@ app.get('/health',
 
 app.get('/',
   (req, res) => {
-    res.send(`Connected Academy API - ${process.env.BRANCH || 'master'}`)
+    res.send('Connected Academy API')
   })
   
 require('./app/routes/auth.js')(app, passport, io)
@@ -119,11 +119,7 @@ startListener = () => {
 }
 
 http.listen(port, () => {
-  if (process.env.BRANCH) {
-    console.log(`Starting API on ${process.env.BRANCH} branch`)
-  } else {
-    console.log(`Listening on port ${port}!`)
-  }
+  console.log(`Starting API on port ${port}`)
   // fakeActivity()
   // fakeResponder()
   startListener()
