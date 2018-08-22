@@ -38,7 +38,7 @@ require('./config/passport')(passport) // pass passport for configuration
 
 app.use(cors({
   credentials: true,
-  origin: ['http://localhost:8080', 'https://connectedacademy.io', /\.connectedacademy\.io$/],
+  origin: ['http://localhost:8080', 'http://ca.local', 'https://connectedacademy.io', 'https://connectedacademy.org', /\.connectedacademy\.io$/, /\.connectedacademy\.org$/],
   methods: ['GET', 'PUT', 'POST', 'DELETE', 'OPTIONS'],
   headers: ['X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version']
 }))
