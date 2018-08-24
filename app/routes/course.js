@@ -15,6 +15,11 @@ async function ensureRole(req, role) {
   }
 }
 
+function liveClassIndex(theClass) {
+  return _findIndex(theClass.content, content => {
+    return content.type === 'liveclass'
+  })
+}
 module.exports = function (app, passport, io) {
 
   // Get course
@@ -214,11 +219,10 @@ module.exports = function (app, passport, io) {
           title: req.body.title
         }
 
-        // TODO: support dynamic class position
-        if (Array.isArray(theClass.content[1].intros)) {
-          theClass.content[1].intros.push(newIntro)
+        if (Array.isArray(theClass.content[liveClassIndex(theClass)].intros)) {
+          theClass.content[liveClassIndex(theClass)].intros.push(newIntro)
         } else {          
-          theClass.content[1].intros = [newIntro]
+          theClass.content[liveClassIndex(theClass)].intros = [newIntro]
         }
       }
 
@@ -235,11 +239,10 @@ module.exports = function (app, passport, io) {
         locationWebm = locationWebm.replace('.mp3', '-64.webm')
         locationWebm = locationWebm.replace('audio', process.env.ENCODED_AUDIO_URI)
 
-        // TODO: store audio duration
-        theClass.content[1].duration = await mp3Duration(uploadPath)
+        // Store audio duration
+        theClass.content[liveClassIndex(theClass)].duration = await mp3Duration(uploadPath)
         
-        // TODO: support dynamic class position
-        theClass.content[1].audio = [
+        theClass.content[liveClassIndex(theClass)].audio = [
           locationMp3,
           locationWebm
         ]
@@ -313,12 +316,12 @@ module.exports = function (app, passport, io) {
       let theClass = await yamlObj.loadFile(configPath, true)
 
       if (req.body.type === 'intro') {
-        let newIntros = theClass.content[1].intros
+        let newIntros = theClass.content[liveClassIndex(theClass)].intros
         const index = _findIndex(newIntros, i => {
           return i.audio === req.body.filename
         })
         newIntros.splice(index, 1)
-        theClass.content[1].intros = newIntros
+        theClass.content[liveClassIndex(theClass)].intros = newIntros
       }
 
       let yamlPath = utils.resolve(req.instance, configPath)
