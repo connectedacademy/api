@@ -2,6 +2,7 @@ const moment = require('moment')
 const fs = require('fs-promise')
 const YAML = require('json2yaml')
 const mp3Duration = require('mp3-duration')
+const _findIndex = require('lodash/findIndex')
 
 const utils = require('../utilities/utils.js')()
 const YamlObj = require('../utilities/yamlObj')
@@ -300,6 +301,33 @@ module.exports = function (app, passport, io) {
       res.send(JSON.parse(jsonFile))
     }
   )
+
+  // Remove audio
+  app.post('/v1/audio/remove',
+    async (req, res) => {
+      await ensureRole(req, 'admin')
+
+      // Load config
+      let yamlObj = new YamlObj(req.instance)
+      const configPath = `/classes/${req.body.theClass}/config.yaml`
+      let theClass = await yamlObj.loadFile(configPath, true)
+
+      if (req.body.type === 'intro') {
+        let newIntros = theClass.content[1].intros
+        const index = _findIndex(newIntros, i => {
+          return i.audio === req.body.filename
+        })
+        newIntros.splice(index, 1)
+        theClass.content[1].intros = newIntros
+      }
+
+      let yamlPath = utils.resolve(req.instance, configPath)
+      let toWrite = YAML.stringify(theClass)
+
+      await fs.writeFile(yamlPath, toWrite)
+
+      res.send('done')
+    })
 
   // Fetch transcription for given class
   app.get('/v1/transcription/fetch/:class',
