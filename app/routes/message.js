@@ -27,8 +27,10 @@ module.exports = function (app, passport, io) {
       } else {
         console.log('User does not want to tweet message')
       }
-
-      if (req.body.twitterEnabled && process.env.TWITTER_ENABLED === 'true') {
+      
+      console.log('process.env.TWITTER_ENABLED', process.env.TWITTER_ENABLED)
+      
+      if (req.body.twitterEnabled && process.env.TWITTER_ENABLED == 'true') {
         console.log('Twitter is enabled')
         // Post tweet
         twitter.sendTweet(req.user, req.body.text)
