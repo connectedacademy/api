@@ -11,6 +11,9 @@ const redisClient = redis.createClient({
 
 const storeMessage = async function (io, tweet) {
   try {
+    // Log tweet
+    console.log('tweet', tweet)
+    
     // Ensure message has a valid url
     let match = undefined
     for (const url of tweet.entities.urls) {
