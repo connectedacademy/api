@@ -10,6 +10,7 @@ const messageSchema = mongoose.Schema({
   text: String,
   tweet: mongoose.Schema.Types.Mixed,
   url: String,
+  tweeted: Boolean,
   created: Date,
   destroyed: Date,
   _likes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],

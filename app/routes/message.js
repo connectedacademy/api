@@ -44,7 +44,8 @@ module.exports = function (app, passport, io) {
         class: req.body.currentClass,
         segment: req.body.currentSegmentGroup,
         segmentGroup: req.body.currentSegmentGroup,
-        text: req.body.text
+        text: req.body.text,
+        tweeted: req.body.twitterEnabled,
       }
       let message = new Message(data)
       message = await message.save()
