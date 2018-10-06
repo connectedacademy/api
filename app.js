@@ -11,15 +11,20 @@ const flash = require('connect-flash')
 const serveStatic = require('serve-static')
 const fileUpload = require('express-fileupload')
 
-const morgan = require('morgan')
 const cookieParser = require('cookie-parser')
 const bodyParser = require('body-parser')
 const session = require('express-session')
 const RedisStore = require('connect-redis')(session)
+const Sentry = require('@sentry/node')
 
 const configDB = require('./config/database.js')
 
 const app = express()
+
+var appRoot = require('app-root-path')
+var winston = require('winston')
+var expressWinston = require('express-winston')
+
 var http = require('http').Server(app)
 var io = require('socket.io')(http)
 
@@ -45,8 +50,42 @@ app.use(cors({
 
 mongoose.connect(configDB.url) // connect to our database
 
-// set up our express application
-app.use(morgan('dev')) // log every request to the console
+// Logging
+app.use(expressWinston.logger({
+  transports: [
+    new winston.transports.File({
+      level: 'silly',
+      filename: `${appRoot}/logs/app.log`,
+      handleExceptions: true,
+      json: true,
+      maxsize: 5242880, // 5MB
+      maxFiles: 5,
+      colorize: false
+    })
+  ],
+  meta: true, // optional: control whether you want to log the meta data about the request (default to true)
+  msg: "HTTP {{req.method}} {{req.url}} {{res.responseTime}}ms {{Date.now()}}", // optional: customize the default logging message. E.g. "{{res.statusCode}} {{req.method}} {{res.responseTime}}ms {{req.url}}"
+  expressFormat: false, // Use the default Express/morgan request formatting. Enabling this will override any msg if true. Will only output colors with colorize set to true
+  colorize: false, // Color the text and status code, using the Express/morgan color palette (text: gray, status: default green, 3XX cyan, 4XX yellow, 5XX red).
+  requestWhitelist: ['url', 'headers', 'method', 'httpVersion', 'originalUrl', 'query', 'body'],
+  timestamp: true,
+  ignoreRoute: function (req, res) { return false } // optional: allows to skip some log messages based on request and/or response
+}))
+
+// Sentry
+Sentry.init({
+  dsn: process.env.SENTRY_DSN,
+  debug: true
+})
+
+// The request handler must be the first middleware on the app
+app.use(Sentry.Handlers.requestHandler())
+
+// The error handler must be before any other error middleware
+app.use(Sentry.Handlers.errorHandler())
+
+Sentry.captureMessage('Application started')
+
 app.use(cookieParser()) // read cookies (needed for auth)
 app.use(bodyParser.json())
 app.use(serveStatic(path.join(__dirname, '../instances')))

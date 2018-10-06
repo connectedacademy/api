@@ -19,3 +19,4 @@ selenium-debug.log
 
 # Other
 app/activity.js
+logs/*

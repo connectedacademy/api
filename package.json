@@ -10,6 +10,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@sentry/node": "^4.0.6",
+    "app-root-path": "^2.1.0",
     "async": "^2.5.0",
     "aws-sdk": "^2.259.1",
     "bcrypt-nodejs": "latest",
@@ -23,6 +25,7 @@
     "express": "^4.16.3",
     "express-fileupload": "^0.4.0",
     "express-session": "^1.15.6",
+    "express-winston": "^3.0.0",
     "faker": "^4.1.0",
     "fetch": "^1.1.0",
     "fluent-ffmpeg": "^2.1.2",
@@ -48,12 +51,14 @@
     "path": "^0.12.7",
     "pug": "^2.0.0-rc.3",
     "randomstring": "^1.1.5",
+    "raven": "^2.6.4",
     "request-promise": "^4.2.2",
     "sentence-generator": "^1.0.1",
     "serve-static": "^1.13.2",
     "simple-markov": "^1.0.2",
     "socket.io": "^2.1.0",
     "twitter": "^1.7.1",
-    "url": "^0.11.0"
+    "url": "^0.11.0",
+    "winston": "^3.1.0"
   }
 }

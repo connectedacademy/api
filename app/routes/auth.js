@@ -22,9 +22,6 @@ module.exports = function (app, passport, io) {
       delete user.twitter.token
       delete user.twitter.tokenSecret
 
-      // Log user
-      console.log('user', user)
-
       res.json({ user: user })
     })
 
