@@ -52,14 +52,14 @@ messageSchema.pre('save', function (next) {
 
 messageSchema.pre('findOne', function (next) {
   this.where({ destroyed: null }) // Ensure has not been destroyed
-  this.populate('_user', 'profile') // Get user profile
+  this.populate('_user', 'profile twitter.username') // Get user profile
   this.populate('_replies') // Get replies
   next()
 })
 
 messageSchema.pre('find', function (next) {
   this.where({ destroyed: null }) // Ensure has not been destroyed
-  this.populate('_user', 'profile') // Get user profile
+  this.populate('_user', 'profile twitter.username') // Get user profile
   this.populate('_replies') // Get replies
   next()
 })
