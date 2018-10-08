@@ -257,6 +257,28 @@ module.exports = function (app, passport, io) {
     }
   )
 
+  // Remove media
+  app.post('/v1/media/remove',
+    async (req, res) => {
+      await ensureRole(req, 'admin')
+
+      console.log(`Attempting to load a file - ${`classes/${req.body.theClass}/media`}`);
+      const file = await utils.loadLocalFile(req.instance, `classes/${req.body.theClass}/media`)
+
+      // Update file and save
+      let json = JSON.parse(file)
+      delete json[req.body.theSegment]
+
+      let jsonPath = utils.resolve(req.instance, `classes/${req.body.theClass}/media.json`)
+      let toWrite = JSON.stringify(json, null, "\t")
+
+      let jsonFile = await fs.writeFile(jsonPath, toWrite)
+      jsonFile = await fs.readFile(jsonPath)
+
+      res.send(JSON.parse(jsonFile))
+    }
+  )
+
   // Upload media to S3
   app.post('/v1/media/upload',
     async (req, res) => {
@@ -289,13 +311,12 @@ module.exports = function (app, passport, io) {
         text: `${result}`
       }
 
-      console.log('json', json)
-
-      json = json.keys.map(key => {
-        return json[key] || { text: undefined }
-      })
-
-      console.log('json', json)
+      for (const key in json) {
+        if (json.hasOwnProperty(key)) {
+          const element = json[key]
+          console.log(element)
+        }
+      }
 
       let jsonPath = utils.resolve(req.instance, `classes/${req.body.theClass}/media.json`)
       let toWrite = JSON.stringify(json, null, "\t")
