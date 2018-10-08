@@ -289,8 +289,10 @@ module.exports = function (app, passport, io) {
         text: `${result}`
       }
 
-      json = json.map(o => {
-        return o || { text: undefined }
+      console.log('json', json)
+
+      json = json.keys.map(key => {
+        return json[key] || { text: undefined }
       })
 
       console.log('json', json)
