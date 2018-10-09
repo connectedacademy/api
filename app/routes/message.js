@@ -21,25 +21,8 @@ module.exports = function (app, passport, io) {
   // Create message
   app.post('/v1/messages/create',
     async (req, res) => {
-      
-      if (req.body.twitterEnabled) {
-        console.log('User wants to tweet message')
-      } else {
-        console.log('User does not want to tweet message')
-      }
-      
-      console.log('process.env.TWITTER_ENABLED', process.env.TWITTER_ENABLED)
-      
-      if (req.body.twitterEnabled && process.env.TWITTER_ENABLED) {
-        console.log('Twitter is enabled')
-        // Post tweet
-        twitter.sendTweet(req.user, req.body.text)
-        return res.json({ msg: 'Sent tweet' })
-      } else {
-        console.log('Twitter is not enabled')
-      }
         
-      const data = {
+      let data = {
         _user: req.user,
         _parent: req.body.replyTo,
         course: req.instance,
@@ -49,6 +32,22 @@ module.exports = function (app, passport, io) {
         text: req.body.text,
         tweeted: req.body.twitterEnabled,
       }
+      
+      console.log('User wants to tweet - ', req.body.twitterEnabled ? 'Yes' : 'No')
+      console.log('process.env.TWITTER_ENABLED', process.env.TWITTER_ENABLED)
+      
+      if (req.body.twitterEnabled && process.env.TWITTER_ENABLED) {
+        console.log('Attempting to tweet')
+        // Post tweet
+        let tweet = await twitter.sendTweet(req.user, req.body.text)
+        if (tweet && tweet.id_str) {
+          console.log('Tweet success!')
+          // Add tweet to message data
+          data.tweet = tweet
+        }
+        return res.json({ msg: 'Sent tweet' })
+      }
+      
       let message = new Message(data)
       message = await message.save()
       message = await Message.findOne({ _id: message._id })

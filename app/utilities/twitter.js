@@ -26,8 +26,10 @@ module.exports = function () {
       client.post('statuses/update', params, function(error, tweet, response) {
         if (!error) {
           console.log(tweet)
+          return tweet
         } else {
           console.error(error)
+          return undefined
         }
       })
     }
