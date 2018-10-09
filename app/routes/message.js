@@ -116,7 +116,7 @@ module.exports = function (app, passport, io) {
         }
         res.json(messages)
       } else {
-        const messages = await Message.find({ $and: [{ class: req.params.class, _parent: { $exists: false } }, { segment: { $gte: req.params.start } }, { segment: { $lte: req.params.end } }] }).limit(100).sort({ created: -1 })
+        const messages = await Message.find({ $and: [{ class: req.params.class, _parent: { $exists: false } }, { segment: { $gte: req.params.start } }, { segment: { $lte: req.params.end } }] }).limit(100).sort({ created: 1 })
         res.json(messages)
       }
     })
