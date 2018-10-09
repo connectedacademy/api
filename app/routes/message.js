@@ -45,7 +45,6 @@ module.exports = function (app, passport, io) {
           // Add tweet to message data
           data.tweet = tweet
         }
-        return res.json({ msg: 'Sent tweet' })
       }
       
       let message = new Message(data)
