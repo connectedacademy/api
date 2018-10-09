@@ -26,6 +26,13 @@ const storeMessage = async function (io, tweet) {
       return
     }
 
+    // Check if message has already been saved
+    let existingMessage = await Message.findOne({ 'tweet.id_str': tweet.id_str })
+    if (existingMessage) {
+      console.log('This message has already been stored, moving on..')
+      return
+    }
+
     // Create the message
     let message = new Message({ tweet: tweet })
     
