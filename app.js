@@ -157,9 +157,15 @@ startListener = () => {
   listener.start()
 }
 
+replayClass = () => {
+  const replay = require('./app/replay.js')(io)
+  replay.start()
+}
+
 http.listen(port, () => {
   console.log(`Starting API on port ${port}`)
   // fakeActivity()
   // fakeResponder()
+  replayClass()
   startListener()
 })
