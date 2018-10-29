@@ -12,7 +12,7 @@ module.exports = function (app, passport, io) {
     async (req, res) => {
 
       // Get data points
-      let vis = await Message.aggregate([{ $match: { class: req.params.class } }, { $group: { _id: "$segment", count: { $sum: 1 } } }])
+      let vis = await Message.aggregate([{ $match: { course: req.instance, class: req.params.class } }, { $group: { _id: "$segment", count: { $sum: 1 } } }])
       
       // Return formatted visualisation
       res.json({ visualisation: visualisation.format(vis, req.params.duration) })
@@ -51,7 +51,7 @@ module.exports = function (app, passport, io) {
       message = await message.save()
       message = await Message.findOne({ _id: message._id })
       
-      const messageCount = await Message.count({ class: message.class, segment: message.segment })
+      const messageCount = await Message.count({ course: req.instance, class: message.class, segment: message.segment })
       message = message.toObject()
       message.total = messageCount
       
@@ -105,9 +105,9 @@ module.exports = function (app, passport, io) {
         const segmentCount = parseInt(req.params.end) - parseInt(req.params.start)
         for (let index = 0; index < segmentCount; index++) {
           const currentSegment = parseInt(req.params.start) + index
-          let message = await Message.findOne({ class: req.params.class, segment: currentSegment }).sort({ created: -1 })
+          let message = await Message.findOne({ course: req.instance, class: req.params.class, segment: currentSegment }).sort({ created: -1 })
           if (message) {
-            const messageCount = await Message.count({ class: req.params.class, segment: currentSegment })
+            const messageCount = await Message.count({ course: req.instance, class: req.params.class, segment: currentSegment })
             message = message.toObject()
             message.total = messageCount
             messages.push(message)
@@ -115,7 +115,7 @@ module.exports = function (app, passport, io) {
         }
         res.json(messages)
       } else {
-        const messages = await Message.find({ $and: [{ class: req.params.class, _parent: { $exists: false } }, { segment: { $gte: req.params.start } }, { segment: { $lte: req.params.end } }] }).limit(100).sort({ created: 1 })
+        const messages = await Message.find({ $and: [{ course: req.instance, class: req.params.class, _parent: { $exists: false } }, { segment: { $gte: req.params.start } }, { segment: { $lte: req.params.end } }] }).limit(100).sort({ created: 1 })
         res.json(messages)
       }
     })
@@ -123,22 +123,22 @@ module.exports = function (app, passport, io) {
   // Get own messages
   app.get('/v1/user/messages/:class',
     async (req, res) => {
-      const messages = await Message.find({ _user: req.user, class: req.params.class }).limit(100).sort({ created: -1 })
+      const messages = await Message.find({ course: req.instance, _user: req.user, class: req.params.class }).limit(100).sort({ created: -1 })
       res.json(messages)
     })
 
   // Get teacher messages
   app.get('/v1/teacher/messages/:class',
     async (req, res) => {
-      const classroom = await Classroom.findOne({ _user: req.user, class: req.params.class })
-      const messages = await Message.find({ $and: [{ class: req.params.class }, { _user: { $in: classroom._students } }] }).limit(100).sort({ created: -1 })
+      const classroom = await Classroom.findOne({ course: req.instance, _user: req.user, class: req.params.class })
+      const messages = await Message.find({ $and: [{ course: req.instance, class: req.params.class }, { _user: { $in: classroom._students } }] }).limit(100).sort({ created: -1 })
       res.json(messages)
     })
 
   // Get admin messages
   app.get('/v1/admin/messages/:class',
     async (req, res) => {
-      const messages = await Message.find({ class: req.params.class }).limit(100).sort({ created: -1 })
+      const messages = await Message.find({ course: req.instance, class: req.params.class }).limit(100).sort({ created: -1 })
       res.json(messages)
     })
 }
